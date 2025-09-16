@@ -96,7 +96,6 @@
       100% { box-shadow:0 6px 18px rgba(255,0,51,.25) }
     }
 
-    /* inputs */
     .input{
       width:min(420px,80vw);
       border:1px solid var(--ring);
@@ -119,8 +118,7 @@
     /* ===== Modal ===== */
     .modal{
       position:fixed; inset:0; display:none; place-items:center; padding:20px;
-      background:rgba(5,8,13,.55); backdrop-filter: blur(6px);
-      z-index:50;
+      background:rgba(5,8,13,.55); backdrop-filter: blur(6px); z-index:50;
     }
     .modal.open{ display:grid }
     .modal-card{
@@ -129,6 +127,7 @@
       box-shadow: 0 10px 40px rgba(0,0,0,.45), inset 0 0 0 1px var(--ring);
       backdrop-filter: blur(14px) saturate(1.2);
       text-align:left;
+      position:relative;
     }
     .modal-title{ margin:4px 0 6px; font-size:22px; font-weight:700 }
     .modal-sub{ margin:0 0 14px; color:var(--muted) }
@@ -136,8 +135,6 @@
     .close-x{
       position:absolute; right:14px; top:14px; background:transparent; border:0; color:#cbd5e1; cursor:pointer; font-size:18px;
     }
-
-    @media (max-width:540px){ .card{ padding:36px 18px } .logo{ font-size:14px } .row{ gap:10px } }
   </style>
 
   <script>
@@ -157,9 +154,8 @@
     <h1>We’re launching soon</h1>
     <p class="lead"><span class="typing">AI agents • creative tools • applied research</span></p>
 
-    <!-- Row with buttons -->
     <div class="row">
-      <!-- NOT mailto: — just opens modal -->
+      <!-- Notify button -->
       <button id="openWaitlist" class="btn" type="button">Notify me</button>
 
       <a class="btn youtube pulse" href="#" onclick="alert('AIFlow Labs Studio YouTube channel is coming soon!'); return false;">
@@ -170,26 +166,25 @@
         YouTube
       </a>
     </div>
-
-    <div id="feedback" class="msg" role="status" aria-live="polite"></div>
   </main>
 
   <footer>© 2025 aiflowlabs.studio</footer>
 
-  <!-- ===== Modal markup ===== -->
+  <!-- Modal -->
   <div id="waitlistModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="waitlistTitle">
     <div class="modal-card">
       <button class="close-x" type="button" aria-label="Close">✕</button>
       <div class="modal-title" id="waitlistTitle">Join the waitlist</div>
       <p class="modal-sub">Leave your name and email — we’ll ping you when early access opens.</p>
 
-      <form id="waitlistForm" class="modal-form" action="ACTION_URL" method="POST" novalidate>
+      <form id="waitlistForm" action="https://formspree.io/f/XXXXXXXX" method="POST" novalidate>
         <!-- honeypot -->
-        <input type="text" name="company" tabindex="-1" autocomplete="off" style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
+        <input type="text" name="company" tabindex="-1" autocomplete="off"
+               style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
 
         <div class="modal-actions">
           <input class="input" type="text" name="name" placeholder="Your name" aria-label="Your name">
-          <input class="input" type="email" name="email" placeholder="you@example.com" aria-label="Email address" required>
+          <input class="input" type="email" name="email" placeholder="you@example.com" aria-label="Email" required>
           <button class="btn" type="submit">Send</button>
           <button class="btn" type="button" id="closeWaitlist" style="background:transparent; color:var(--text); border:1px solid var(--ring)">Cancel</button>
         </div>
@@ -200,7 +195,7 @@
   </div>
 
   <script>
-    // ==== Modal open/close ====
+    // Modal open/close
     (function(){
       const openBtn = document.getElementById('openWaitlist');
       const modal = document.getElementById('waitlistModal');
@@ -213,9 +208,8 @@
         modal.classList.add('open');
         setTimeout(()=> (nameInput.value ? emailInput : nameInput).focus(), 50);
       }
-      function closeModal(){
-        modal.classList.remove('open');
-      }
+      function closeModal(){ modal.classList.remove('open'); }
+
       openBtn.addEventListener('click', openModal);
       closeX.addEventListener('click', closeModal);
       closeBtn.addEventListener('click', closeModal);
@@ -223,57 +217,40 @@
       window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     })();
 
-    // ==== AJAX submit to your form endpoint ====
+    // Submit
     (function(){
       const form = document.getElementById('waitlistForm');
       const modalMsg = document.getElementById('modalMsg');
-      const feedback = document.getElementById('feedback');
-
-      // !!! Replace with your provider endpoint (Formspree/Basin/Getform)
-      const ACTION_URL = 'https://formspree.io/f/XXXXXXXX'; // <-- put your URL here
-      form.setAttribute('action', ACTION_URL);
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const honeypot = form.querySelector('input[name="company"]');
-        if (honeypot.value) return; // bot
+        const hp = form.querySelector('input[name="company"]');
+        if (hp.value) return; // bot
 
-        const name = form.name.value.trim();
         const email = form.email.value.trim();
-
         modalMsg.className = 'msg';
         modalMsg.textContent = '';
-
         if (!/^\S+@\S+\.\S+$/.test(email)) {
           modalMsg.classList.add('err');
           modalMsg.textContent = 'Please enter a valid email.';
-          form.email.focus();
-          return;
+          form.email.focus(); return;
         }
 
         const data = new FormData(form);
-        // helpful: include a subject or hidden label for your inbox
         data.append('_subject', 'New waitlist signup — aiflowlabs.studio');
-        if (!data.get('name') && name) data.set('name', name);
 
         try {
-          const res = await fetch(ACTION_URL, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' },
-            body: data
-          });
+          const res = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: data });
           if (res.ok) {
             modalMsg.classList.add('ok');
             modalMsg.textContent = 'Thanks! Check your inbox for a note from us ✉️';
-            feedback.className = 'msg ok';
-            feedback.textContent = 'You’re in. We’ve sent a confirmation to your email.';
             form.reset();
           } else {
             modalMsg.classList.add('err');
             modalMsg.textContent = 'Hmm, something went wrong. Please try again.';
           }
-        } catch (err) {
+        } catch {
           modalMsg.classList.add('err');
           modalMsg.textContent = 'Network error. Try again in a moment.';
         }
