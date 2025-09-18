@@ -38,16 +38,15 @@
       color:#0b0f14; background: linear-gradient(90deg,var(--grad-a),var(--grad-b)); box-shadow:0 6px 18px rgba(0,212,255,.25); transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; cursor:pointer; border:0; }
     .btn:hover{ transform:translateY(-1px); filter:brightness(1.05) }
 
-
-   
-.btn.grad{
-  color:#0b0f14;
-  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
-  box-shadow:0 6px 18px rgba(0,212,255,.25);
-}
-.btn.grad:hover{ transform:translateY(-1px); filter:brightness(1.05) }
-
-
+    /* YouTube style */
+    .btn.youtube{ background:#ff0033; color:#fff; box-shadow:0 6px 18px rgba(255,0,51,.25) }
+    .btn.youtube:hover{ transform:translateY(-1px); filter:brightness(1.05) }
+    .pulse{ animation:pulse 2s infinite }
+    @keyframes pulse{
+      0%{ box-shadow:0 6px 18px rgba(255,0,51,.25) }
+      50%{ box-shadow:0 0 24px rgba(255,0,51,.6) }
+      100%{ box-shadow:0 6px 18px rgba(255,0,51,.25) }
+    }
 
     footer{ position:fixed; bottom:14px; left:0; right:0; text-align:center; color:#94a2b8; font-size:12px }
 
@@ -76,13 +75,8 @@
     <p class="lead"><span class="typing">AI agents • creative tools • applied research</span></p>
 
     <div class="row">
-  <button id="openWaitlist" class="btn grad" type="button">Notify me</button>
-
-<div class="row">
-  <button id="openWaitlist" class="btn grad" type="button">Notify me</button>
-  <a class="btn grad" href="#" target="_blank" rel="noopener">YouTube</a>
-</div>
-      
+      <button id="openWaitlist" class="btn" type="button">Notify me</button>
+      <a class="btn youtube pulse" href="#" target="_blank" rel="noopener">YouTube</a>
     </div>
     <div id="feedback" class="msg" role="status" aria-live="polite"></div>
   </main>
