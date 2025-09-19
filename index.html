@@ -120,7 +120,7 @@
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbyGuPmcU2xV6a7Tflxkej5aNxnLLlR4_iXEcdNLLeEgD1op-VKOOxGvxWT8OvWanfa7/exec?pm=1"
+            action="https://script.google.com/macros/s/AKfycbyIB9NDRM9P26TiTMaa0UJg4x1J2s8XAOmXCuHpFIsttZ65aAl93Ayn6lrIqBRRshgR/exec?pm=1"
             method="POST"
             target="hidden_iframe"
             novalidate>
@@ -218,16 +218,14 @@
 
   // Ответ от Apps Script через postMessage
   window.addEventListener('message', (ev) => {
-    // Можно фильтровать только наш iframe:
-    // if (ev.source !== iframe.contentWindow) return;
+    // при желании фильтруй по source:
+    // if (ev.source !== document.querySelector('iframe[name="hidden_iframe"]').contentWindow) return;
 
     const data = ev?.data;
     if (!data || typeof data !== 'object') return;
 
-    clearTimeout(ackTimer);
-    inFlight = false;
-
-    const btn = form.querySelector('button[type="submit"]');
+    // Вернуть кнопку в норму
+    const btn = document.querySelector('#waitlistForm button[type="submit"]');
     if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
 
     if (data.ok === false) {
@@ -236,6 +234,15 @@
       return;
     }
 
+    // Если скрипт отработал, но письмо пользователю не ушло
+    if (data.ok === true && data.mailed === false) {
+      modalMsg.className = 'msg err';
+      modalMsg.textContent = 'Заявка получена, но письмо не доставлено. Проверьте адрес/спам или попробуйте другой email.';
+      if (pageMsg) { pageMsg.className = 'msg err'; pageMsg.textContent = 'Email delivery failed.'; }
+      return; // не сбрасываем форму — можно поправить email
+    }
+
+    // Обычные ветки
     if (data.ok === true) {
       if (data.duplicate) {
         modalMsg.className = 'msg ok';
@@ -246,10 +253,9 @@
         modalMsg.textContent = 'Thanks! You’re on the list.';
         if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
       }
-      form.reset();
+      document.getElementById('waitlistForm').reset();
     }
   });
-</script>
 
 
 </body>
