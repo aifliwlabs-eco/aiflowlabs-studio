@@ -144,85 +144,107 @@
   </div>
 
   <script>
-    // Modal open/close
-    const openBtn = document.getElementById('openWaitlist');
-    const modal   = document.getElementById('waitlistModal');
-    const closeX  = modal.querySelector('.close-x');
+  // ---- Modal open/close ----
+  const openBtn = document.getElementById('openWaitlist');
+  const modal   = document.getElementById('waitlistModal');
+  const closeX  = modal.querySelector('.close-x');
 
-    openBtn.addEventListener('click', () => modal.classList.add('open'));
-    closeX.addEventListener('click', () => modal.classList.remove('open'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+  openBtn.addEventListener('click', () => modal.classList.add('open'));
+  closeX.addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
-    // Form + hidden iframe + postMessage feedback
-    const form     = document.getElementById('waitlistForm');
-    const modalMsg = document.getElementById('modalMsg');
-    const pageMsg  = document.getElementById('feedback');
+  // ---- Form + hidden iframe + robust feedback ----
+  const form     = document.getElementById('waitlistForm');
+  const modalMsg = document.getElementById('modalMsg');
+  const pageMsg  = document.getElementById('feedback');
+  const iframe   = document.querySelector('iframe[name="hidden_iframe"]');
 
-    form.addEventListener('submit', (e) => {
-      // honeypot
-      if (form.company.value) { e.preventDefault(); return; }
+  let inFlight = false;
+  let ackTimer = null;
 
-      const name  = form.name.value.trim();
-      const email = form.email.value.trim();
+  // Валидация и старт отправки
+  form.addEventListener('submit', (e) => {
+    // honeypot
+    if (form.company.value) { e.preventDefault(); return; }
 
-      modalMsg.className = 'msg'; modalMsg.textContent = '';
+    const name  = form.name.value.trim();
+    const email = form.email.value.trim();
 
-      if (!name) {
-        e.preventDefault();
-        modalMsg.classList.add('err');
-        modalMsg.textContent = 'Please enter your name.';
-        return;
+    modalMsg.className = 'msg';
+    modalMsg.textContent = '';
+
+    if (!name) {
+      e.preventDefault();
+      modalMsg.classList.add('err');
+      modalMsg.textContent = 'Please enter your name.';
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      e.preventDefault();
+      modalMsg.classList.add('err');
+      modalMsg.textContent = 'Please enter a valid email.';
+      return;
+    }
+
+    // UI: блокируем кнопку и ставим флаги ожидания
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    inFlight = true;
+
+    // Разовый onload: если postMessage не придёт, всё равно вернём кнопку
+    const onLoadOnce = () => {
+      if (!inFlight) return; // уже обработано через postMessage
+      clearTimeout(ackTimer);
+      if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+      // Сообщение не трогаем — возможно postMessage прилетит чуть позже
+    };
+    iframe.addEventListener('load', onLoadOnce, { once: true });
+
+    // Таймаут-страховка на случай блокировок расширениями
+    clearTimeout(ackTimer);
+    ackTimer = setTimeout(() => {
+      if (!inFlight) return;
+      modalMsg.className = 'msg err';
+      modalMsg.textContent = 'Still sending… If this hangs, try Incognito (extensions may block the response).';
+      if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+      inFlight = false;
+    }, 10000);
+  });
+
+  // Ответ от Apps Script через postMessage
+  window.addEventListener('message', (ev) => {
+    // Если хочется жёстко фильтровать только наш iframe, раскомментируй строку ниже:
+    // if (ev.source !== iframe.contentWindow) return;
+
+    const data = ev?.data;
+    if (!data || typeof data !== 'object') return;
+
+    clearTimeout(ackTimer);
+    inFlight = false;
+
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+
+    if (data.ok === false) {
+      modalMsg.className = 'msg err';
+      modalMsg.textContent = 'Something went wrong. Please try again.';
+      return;
+    }
+
+    if (data.ok === true) {
+      if (data.duplicate) {
+        modalMsg.className = 'msg ok';
+        modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
+        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Already subscribed.'; }
+      } else {
+        modalMsg.className = 'msg ok';
+        modalMsg.textContent = 'Thanks! You’re on the list.';
+        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
       }
-      if (!/^\S+@\S+\.\S+$/.test(email)) {
-        e.preventDefault();
-        modalMsg.classList.add('err');
-        modalMsg.textContent = 'Please enter a valid email.';
-        return;
-      }
-      // дальше отправляем в hidden_iframe; ждём postMessage
-    });
+      form.reset();
+    }
+  });
+</script>
 
-    // Слушаем ответ от Apps Script через postMessage
-    window.addEventListener('message', (ev) => {
-      const data = ev?.data;
-      if (!data || typeof data !== 'object') return;
-
-      if (data.ok === false) {
-        modalMsg.className = 'msg err';
-        modalMsg.textContent = 'Something went wrong. Please try again.';
-        return;
-      }
-
-      if (data.ok === true) {
-        if (data.duplicate) {
-          modalMsg.className = 'msg ok';
-          modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
-          if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Already subscribed.'; }
-        } else {
-          modalMsg.className = 'msg ok';
-          modalMsg.textContent = 'Thanks! You’re on the list.';
-          if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
-        }
-        form.reset();
-      }
-    });
-    // Блокируем кнопку на время отправки
-form.addEventListener('submit', () => {
-  const btn = form.querySelector('button[type="submit"]');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-  }
-});
-
-// Возвращаем кнопку после ответа из iframe
-window.addEventListener('message', (ev) => {
-  const btn = form.querySelector('button[type="submit"]');
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = 'Send';
-  }
-});
-  </script>
 </body>
 </html>
