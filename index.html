@@ -120,7 +120,7 @@
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbxSlLvkVGPNinA65ebIu4qOqFdVEJkasLZx3UvblLHTV93TtYyg4_2czmV8m1X6NVUW/exec?pm=1"
+            action="https://script.google.com/macros/s/AKfycbyGuPmcU2xV6a7Tflxkej5aNxnLLlR4_iXEcdNLLeEgD1op-VKOOxGvxWT8OvWanfa7/exec?pm=1"
             method="POST"
             target="hidden_iframe"
             novalidate>
@@ -206,6 +206,23 @@
         form.reset();
       }
     });
+    // Блокируем кнопку на время отправки
+form.addEventListener('submit', () => {
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+  }
+});
+
+// Возвращаем кнопку после ответа из iframe
+window.addEventListener('message', (ev) => {
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  }
+});
   </script>
 </body>
 </html>
