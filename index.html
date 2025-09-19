@@ -6,87 +6,82 @@
   <title>aiflowlabs.studio — Coming Soon</title>
   <meta name="description" content="AIFlow Labs Studio — AI agents, creative tools & apps. Launching soon." />
   <meta name="theme-color" content="#0A0A0A" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
   <style>
     :root{ --bg-1:#0b0f14; --bg-2:#0c1220; --grad-a:#00d4ff; --grad-b:#ff0080; --grad-c:#7cff96; --text:#e9eef5; --muted:#93a0b3; --ring:rgba(255,255,255,.12); }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,sans-serif;
-      color:var(--text);
-      background: radial-gradient(1200px 900px at 70% -10%, #15203a 0%, transparent 60%),
-                  linear-gradient(180deg,var(--bg-1),var(--bg-2));
-      display:flex; align-items:center; justify-content:center; overflow:hidden;
-    }
-    .ribbon{ position:absolute; inset:auto -20vw 50% -20vw; height:44vh; pointer-events:none;
-      filter: blur(24px) saturate(1.3) contrast(1.05);
-      background: radial-gradient(60% 140% at 10% 40%, rgba(0,212,255,.45), transparent 60%),
-                  radial-gradient(60% 140% at 90% 60%, rgba(255,0,128,.45), transparent 60%);
-      mix-blend-mode:screen; opacity:.65; animation: float 14s ease-in-out infinite; transform:translateY(10vh) rotate(-6deg);
-    }
-    @keyframes float{0%,100%{transform:translateY(10vh) rotate(-6deg)}50%{transform:translateY(14vh) rotate(-8deg)}}
-    .card{ position:relative; width:min(860px,92vw); padding:48px 28px; border-radius:20px;
-      background: rgba(255,255,255,.06);
-      box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 0 0 1px var(--ring);
-      backdrop-filter: blur(14px) saturate(1.2); text-align:center;
-    }
-    .logo{ display:inline-flex; gap:.6ch; align-items:center; padding:.55rem .9rem; border-radius:999px;
-      background:rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px var(--ring);
-      font-weight:600; letter-spacing:.4px;
-    }
-    .logo b{ background: linear-gradient(90deg,var(--grad-a),var(--grad-b),var(--grad-c));
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    }
-    h1{ margin:18px 0 6px; font-size: clamp(28px,5vw,48px); line-height:1.05;
-      background: linear-gradient(90deg,var(--grad-a),var(--grad-b));
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      animation: hue 10s linear infinite;
-    }
-    @keyframes hue{from{filter:hue-rotate(0)}to{filter:hue-rotate(360deg)}}
-    .lead{ margin:0 auto 18px; max-width:60ch; color:var(--muted); font-size:clamp(15px,2.6vw,18px);}
-    .typing{ display:inline-block; border-right:2px solid rgba(255,255,255,.7); white-space:nowrap; overflow:hidden; width:0;
-      animation:type 3.8s steps(36,end) forwards, blink .9s step-end infinite;
-    }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+      color:var(--text); background: radial-gradient(1200px 900px at 70% -10%, #15203a 0%, transparent 60%), linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      display:flex; align-items:center; justify-content:center; overflow:hidden; }
+
+    .ribbon{ position:absolute; inset:auto -20vw 50% -20vw; height:44vh; pointer-events:none; filter: blur(24px) saturate(1.3) contrast(1.05);
+      background: radial-gradient(60% 140% at 10% 40%, rgba(0,212,255,.45), transparent 60%), radial-gradient(60% 140% at 90% 60%, rgba(255,0,128,.45), transparent 60%);
+      mix-blend-mode:screen; opacity:.65; animation: float 14s ease-in-out infinite; transform:translateY(10vh) rotate(-6deg); }
+    @keyframes float{ 0%,100%{transform:translateY(10vh) rotate(-6deg)} 50%{transform:translateY(14vh) rotate(-8deg)} }
+
+    .card{ position:relative; width:min(860px,92vw); padding:48px 28px; border-radius:20px; background: rgba(255,255,255,.06);
+      box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 0 0 1px var(--ring); backdrop-filter: blur(14px) saturate(1.2); text-align:center; }
+    .logo{ display:inline-flex; gap:.6ch; align-items:center; padding:.55rem .9rem; border-radius:999px; background:rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px var(--ring); font-weight:600; letter-spacing:.4px; }
+    .logo b{ background: linear-gradient(90deg,var(--grad-a),var(--grad-b),var(--grad-c)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    h1{ margin:18px 0 6px; font-size: clamp(28px, 5vw, 48px); line-height:1.05; background: linear-gradient(90deg,var(--grad-a),var(--grad-b));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: hue 10s linear infinite; }
+    @keyframes hue{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
+    .lead{ margin:0 auto 18px; max-width:60ch; color:var(--muted); font-size:clamp(15px,2.6vw,18px); }
+    .typing{ display:inline-block; border-right:2px solid rgba(255,255,255,.7); white-space:nowrap; overflow:hidden; width:0; animation:type 3.8s steps(36,end) forwards,blink .9s step-end infinite;}
     @keyframes type{to{width:36ch}} @keyframes blink{50%{border-color:transparent}}
     .row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px }
     .btn{ text-decoration:none; font-weight:600; padding:12px 16px; border-radius:12px; display:inline-flex; align-items:center; gap:.5rem;
-      color:#0b0f14; background: linear-gradient(90deg,var(--grad-a),var(--grad-b));
-      box-shadow:0 6px 18px rgba(0,212,255,.25);
-      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; cursor:pointer; border:0;
-    }
+      color:#0b0f14; background: linear-gradient(90deg,var(--grad-a),var(--grad-b)); box-shadow:0 6px 18px rgba(0,212,255,.25); transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; cursor:pointer; border:0; }
     .btn:hover{ transform:translateY(-1px); filter:brightness(1.05) }
-    footer{ position:fixed; bottom:14px; left:0; right:0; text-align:center; color:#94a2b8; font-size:12px }
-    .modal{ position:fixed; inset:0; display:none; place-items:center; padding:20px; background:rgba(5,8,13,.55);
-      backdrop-filter: blur(6px); z-index:50;
+
+    /* YouTube style */
+    .btn.youtube{ background:#ff0033; color:#fff; box-shadow:0 6px 18px rgba(255,0,51,.25) }
+    .btn.youtube:hover{ transform:translateY(-1px); filter:brightness(1.05) }
+    .pulse{ animation:pulse 2s infinite }
+    @keyframes pulse{
+      0%{ box-shadow:0 6px 18px rgba(255,0,51,.25) }
+      50%{ box-shadow:0 0 24px rgba(255,0,51,.6) }
+      100%{ box-shadow:0 6px 18px rgba(255,0,51,.25) }
     }
+
+    footer{ position:fixed; bottom:14px; left:0; right:0; text-align:center; color:#94a2b8; font-size:12px }
+
+    /* Modal */
+    .modal{ position:fixed; inset:0; display:none; place-items:center; padding:20px; background:rgba(5,8,13,.55); backdrop-filter: blur(6px); z-index:50; }
     .modal.open{ display:grid }
     .modal-card{ width:min(460px,92vw); border-radius:16px; padding:22px; background: rgba(255,255,255,.07);
-      box-shadow: 0 10px 40px rgba(0,0,0,.45), inset 0 0 0 1px var(--ring);
-      backdrop-filter: blur(14px) saturate(1.2); text-align:left; position:relative;
-    }
+      box-shadow: 0 10px 40px rgba(0,0,0,.45), inset 0 0 0 1px var(--ring); backdrop-filter: blur(14px) saturate(1.2); text-align:left; position:relative; }
     .modal-title{ margin:4px 0 6px; font-size:22px; font-weight:700 }
     .modal-sub{ margin:0 0 14px; color:var(--muted) }
     .modal-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center }
-    .input{ flex:1; border:1px solid var(--ring); background:rgba(255,255,255,.06); color:var(--text);
-      border-radius:12px; padding:12px 14px; outline:none;
-    }
+    .input{ flex:1; border:1px solid var(--ring); background:rgba(255,255,255,.06); color:var(--text); border-radius:12px; padding:12px 14px; outline:none; }
     .input::placeholder{ color:#b6c2d4 }
     .msg{ font-size:14px; margin-top:12px }
-    .msg.ok{ color:#7cff96 } .msg.err{ color:#ff7a7a }
+    .msg.ok{ color:#7cff96 }
+    .msg.err{ color:#ff7a7a }
     .close-x{ position:absolute; right:14px; top:14px; background:transparent; border:0; color:#cbd5e1; cursor:pointer; font-size:18px; }
   </style>
 </head>
 <body>
   <div class="ribbon" aria-hidden="true"></div>
+
   <main class="card" role="main">
     <span class="logo"><b>AIFlow</b> Labs Studio</span>
     <h1>We’re launching soon</h1>
     <p class="lead"><span class="typing">AI agents • creative tools • applied research</span></p>
+
     <div class="row">
       <button id="openWaitlist" class="btn" type="button">Notify me</button>
+      <a class="btn youtube pulse" href="#" target="_blank" rel="noopener">YouTube</a>
     </div>
     <div id="feedback" class="msg" role="status" aria-live="polite"></div>
   </main>
-  <footer>© <span id="year"></span> aiflowlabs.studio</footer>
+
+  <footer>© 2025 aiflowlabs.studio</footer>
 
   <!-- Modal -->
   <div id="waitlistModal" class="modal" role="dialog" aria-modal="true">
@@ -96,59 +91,63 @@
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbwvsEtGUu6Yn1v3wQGRlu71oRNch-dbpkm26a3-b5LF6h_K50BAeAgBoZ46S3g-QlC5/exec?pm=1"
+            action="https://script.google.com/macros/s/AKfycbypdrEBTrXKEBUgYjL8KHvxndALJUSrBi3zbPGJ2F5sys_nWHNWNCXS1PId0-cYMQIJ/exec"
             method="POST"
             target="hidden_iframe"
             novalidate>
         <input type="text" name="company" tabindex="-1" autocomplete="off"
                style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
+
         <div class="modal-actions">
-          <input class="input" type="text" name="name" placeholder="Your name" required>
+          <input class="input" type="text"  name="name"  placeholder="Your name" required>
           <input class="input" type="email" name="email" placeholder="you@example.com" required>
           <button class="btn" type="submit">Send</button>
         </div>
+
         <div id="modalMsg" class="msg" role="status" aria-live="polite"></div>
       </form>
+
       <iframe name="hidden_iframe" style="display:none;"></iframe>
     </div>
   </div>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-
     // Modal open/close
     const openBtn = document.getElementById('openWaitlist');
-    const modal   = document.getElementById('waitlistModal');
-    const closeX  = modal.querySelector('.close-x');
-    openBtn.addEventListener('click',()=>modal.classList.add('open'));
-    closeX.addEventListener('click',()=>modal.classList.remove('open'));
-    modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
+    const modal = document.getElementById('waitlistModal');
+    const closeX = modal.querySelector('.close-x');
+
+    openBtn.addEventListener('click', () => modal.classList.add('open'));
+    closeX.addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
     // Hidden-iframe form submit
     const form     = document.getElementById('waitlistForm');
     const iframe   = document.getElementsByName('hidden_iframe')[0];
     const modalMsg = document.getElementById('modalMsg');
     const pageMsg  = document.getElementById('feedback');
-    let submitted=false;
+    let submitted = false;
 
-    form.addEventListener('submit',e=>{
-      if(form.company.value){e.preventDefault();return;}
-      const name=form.name.value.trim();
-      const email=form.email.value.trim();
-      modalMsg.className='msg'; modalMsg.textContent='';
-      if(!name){e.preventDefault();modalMsg.classList.add('err');modalMsg.textContent='Please enter your name.';return;}
-      if(!/^\S+@\S+\.\S+$/.test(email)){e.preventDefault();modalMsg.classList.add('err');modalMsg.textContent='Please enter a valid email.';return;}
-      submitted=true;
+    form.addEventListener('submit', e => {
+      if (form.company.value) { e.preventDefault(); return; } // honeypot
+      const name  = form.name.value.trim();
+      const email = form.email.value.trim();
+      modalMsg.className = 'msg'; modalMsg.textContent = '';
+
+      if (!name){ e.preventDefault(); modalMsg.classList.add('err'); modalMsg.textContent = 'Please enter your name.'; return; }
+      if (!/^\S+@\S+\.\S+$/.test(email)){ e.preventDefault(); modalMsg.classList.add('err'); modalMsg.textContent = 'Please enter a valid email.'; return; }
+
+      submitted = true;
     });
 
-    iframe.addEventListener('load',()=>{
-      if(!submitted)return;
-      modalMsg.className='msg ok';
-      modalMsg.textContent='Thanks! Check your inbox for confirmation.';
-      pageMsg.className='msg ok';
-      pageMsg.textContent='You’re on the list — confirmation sent.';
+    iframe.addEventListener('load', () => {
+      if (!submitted) return;
+      modalMsg.className = 'msg ok';
+      modalMsg.textContent = 'Thanks! Check your inbox for confirmation.';
+      pageMsg.className = 'msg ok';
+      pageMsg.textContent = 'You’re on the list — confirmation sent.';
       form.reset();
-      submitted=false;
+      submitted = false;
     });
   </script>
 </body>
