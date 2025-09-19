@@ -120,14 +120,14 @@
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbyAhqtbqDb2gqs7MAT9tBywAzGftH0Vs7XZAYdyAkUt6Y1iNL7ntMkGfD4FkeSprANg/exec"
+            action="https://script.google.com/macros/s/AKfycbxvMqXvJGbyYKLLc5bY5NdfXVUANEUspJpHY_DQ3OrPpCTkE2TmQu_j3wUTWlhMmc36/exec?pm=1"
             method="POST"
             target="hidden_iframe"
             novalidate>
         <!-- honeypot -->
         <input type="text" name="company" tabindex="-1" autocomplete="off"
                style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
-        <!-- postMessage flag -->
+        <!-- postMessage flag (дублируем с URL) -->
         <input type="hidden" name="pm" value="1">
 
         <div class="modal-actions">
@@ -179,18 +179,12 @@
         modalMsg.textContent = 'Please enter a valid email.';
         return;
       }
-      // Дальше форма уходит в hidden_iframe → Apps Script → postMessage
+      // дальше отправляем в hidden_iframe; ждём postMessage
     });
 
-    // Получаем результат от скрипта (pm=1 → он шлёт window.parent.postMessage)
+    // Слушаем ответ от Apps Script через postMessage
     window.addEventListener('message', (ev) => {
-      try {
-        // при желании можно сузить источник:
-        // const origin = new URL(ev.origin).hostname;
-        // if (!/script\.google\.com$/.test(origin)) return;
-      } catch(_) {}
-
-      const data = ev.data || {};
+      const data = ev?.data;
       if (!data || typeof data !== 'object') return;
 
       if (data.ok === false) {
