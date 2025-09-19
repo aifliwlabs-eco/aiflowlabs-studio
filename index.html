@@ -197,8 +197,8 @@
       clearTimeout(ackTimer);
 
       modalMsg.className = 'msg ok';
-      modalMsg.textContent = 'Заявка получена — проверьте почту в ближайшее время.';
-      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Заявка отправлена.'; }
+      modalMsg.textContent = 'Request received — check your email shortly.';
+      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Request received.'; }
 
       if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
       inFlight = false;
