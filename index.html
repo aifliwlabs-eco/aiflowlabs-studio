@@ -119,15 +119,16 @@
       <div class="modal-title">Join the waitlist</div>
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
+      <!-- IMPORTANT: Replace ACTION_URL below with your latest Web App /exec URL -->
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbzUGF34o1hPl8dL-JB6ZtbYgOf4pQhTovH8mzCach5ri3sQMbQ5GT_k5ycHKiblNBIw/exec?pm=1"
+            action="https://script.google.com/macros/s/AKfycbwsb5nQh0vurc2laL79-r1K8VFA3_zaVwwgZCAMV_Ig012rJnBGL3lfYF0OEQMKx6TJ/exec?pm=1"
             method="POST"
             target="hidden_iframe"
             novalidate>
-        <!-- honeypot -->
+        <!-- Honeypot (must stay empty) -->
         <input type="text" name="company" tabindex="-1" autocomplete="off"
                style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
-        <!-- postMessage flag (дублируем с URL) -->
+        <!-- Explicit postMessage flag (duplicated in URL) -->
         <input type="hidden" name="pm" value="1">
 
         <div class="modal-actions">
@@ -143,149 +144,146 @@
     </div>
   </div>
 
- <script>
-  // ---- Modal open/close ----
-  const openBtn = document.getElementById('openWaitlist');
-  const modal   = document.getElementById('waitlistModal');
-  const closeX  = modal.querySelector('.close-x');
+  <script>
+    // --- Modal open/close ---
+    const openBtn = document.getElementById('openWaitlist');
+    const modal   = document.getElementById('waitlistModal');
+    const closeX  = modal.querySelector('.close-x');
 
-  // ---- Form + hidden iframe + robust feedback ----
-  const form     = document.getElementById('waitlistForm');
-  const modalMsg = document.getElementById('modalMsg');
-  const pageMsg  = document.getElementById('feedback');
-  const iframe   = document.querySelector('iframe[name="hidden_iframe"]');
-  const hpField  = form.querySelector('input[name="company"]'); // honeypot
+    // --- Form + hidden iframe + robust feedback ---
+    const form     = document.getElementById('waitlistForm');
+    const modalMsg = document.getElementById('modalMsg');
+    const pageMsg  = document.getElementById('feedback');
+    const iframe   = document.querySelector('iframe[name="hidden_iframe"]');
+    const hpField  = form.querySelector('input[name="company"]'); // honeypot
 
-  let inFlight = false;
-  let ackTimer = null;
+    let inFlight = false;
+    let ackTimer = null;
 
-  function resetUI() {
-    clearTimeout(ackTimer);
-    inFlight = false;
-    modalMsg.className = 'msg';
-    modalMsg.textContent = '';
-    if (pageMsg) { pageMsg.className = 'msg'; pageMsg.textContent = ''; }
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
-  }
-
-  openBtn.addEventListener('click', () => {
-    // Сброс honeypot и UI при каждом открытии
-    if (hpField) hpField.value = '';
-    resetUI();
-    modal.classList.add('open');
-  });
-
-  closeX.addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
-
-  // Валидация и старт отправки
-  form.addEventListener('submit', (e) => {
-    // Если honeypot вдруг чем-то заполнен (авто-заполнение) — очищаем и продолжаем
-    if (hpField && hpField.value) hpField.value = '';
-
-    const name  = form.name.value.trim();
-    const email = form.email.value.trim();
-
-    modalMsg.className = 'msg';
-    modalMsg.textContent = '';
-
-    if (!name) {
-      e.preventDefault();
-      modalMsg.classList.add('err');
-      modalMsg.textContent = 'Please enter your name.';
-      return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      e.preventDefault();
-      modalMsg.classList.add('err');
-      modalMsg.textContent = 'Please enter a valid email.';
-      return;
-    }
-
-    // UI: блокируем кнопку и ставим флаги ожидания
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-    inFlight = true;
-
-    // Разовый onload: если postMessage не придёт, всё равно вернём кнопку + покажем fallback
-    const onLoadOnce = () => {
-      if (!inFlight) return; // уже обработано через postMessage
+    function resetUI() {
       clearTimeout(ackTimer);
-
-      modalMsg.className = 'msg ok';
-      modalMsg.textContent = 'Заявка получена — проверьте почту в ближайшее время.';
-      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Заявка отправлена.'; }
-
-      if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
       inFlight = false;
-    };
-    iframe.addEventListener('load', onLoadOnce, { once: true });
-
-    // Таймаут-страховка на случай блокировок расширениями
-    clearTimeout(ackTimer);
-    ackTimer = setTimeout(() => {
-      if (!inFlight) return;
-      modalMsg.className = 'msg err';
-      modalMsg.textContent = 'Still sending… If this hangs, try Incognito (extensions may block the response).';
+      modalMsg.className = 'msg';
+      modalMsg.textContent = '';
+      if (pageMsg) { pageMsg.className = 'msg'; pageMsg.textContent = ''; }
+      const btn = form.querySelector('button[type="submit"]');
       if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
-      inFlight = false;
-    }, 10000);
-    // ВАЖНО: не вызываем e.preventDefault(); форма должна реально отправиться в iframe
-  });
-
-  const TRUSTED_ORIGINS = [
-    'https://script.google.com',
-    'https://script.googleusercontent.com',
-  ];
-
-  window.addEventListener('message', (ev) => {
-    // ✅ Фильтруем по origin, а не по ev.source
-    if (!TRUSTED_ORIGINS.some(o => ev.origin && ev.origin.startsWith(o))) {
-      // Если хочешь — убери этот лог вовсе
-      // console.debug('ignoring postMessage from', ev.origin);
-      return;
     }
 
-    const data = ev?.data;
-    if (!data || typeof data !== 'object') return;
+    openBtn.addEventListener('click', () => {
+      if (hpField) hpField.value = ''; // clear honeypot on open
+      resetUI();
+      modal.classList.add('open');
+    });
 
-    // дальше твоя логика:
-    clearTimeout(ackTimer);
-    inFlight = false;
+    closeX.addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+    // Allowed origins for Apps Script postMessage
+    const TRUSTED_ORIGINS = [
+      'https://script.google.com',
+      'https://script.googleusercontent.com',
+    ];
 
-    if (data.ok === false) {
-      modalMsg.className = 'msg err';
-      modalMsg.textContent = 'Something went wrong. Please try again.';
-      return;
-    }
+    // Validation and submit start
+    form.addEventListener('submit', (e) => {
+      // Never block on honeypot — just clear it (some extensions may autofill it)
+      if (hpField && hpField.value) hpField.value = '';
 
-    if (data.ok === true) {
-      if (data.mailed === false) {
-        modalMsg.className = 'msg err';
-        modalMsg.textContent = 'Заявка получена, но письмо не доставлено. Проверьте адрес/спам или попробуйте другой email.';
-        if (pageMsg) { pageMsg.className = 'msg err'; pageMsg.textContent = 'Email delivery failed.'; }
+      const name  = form.name.value.trim();
+      const email = form.email.value.trim();
+
+      modalMsg.className = 'msg';
+      modalMsg.textContent = '';
+
+      if (!name) {
+        e.preventDefault();
+        modalMsg.classList.add('err');
+        modalMsg.textContent = 'Please enter your name.';
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        e.preventDefault();
+        modalMsg.classList.add('err');
+        modalMsg.textContent = 'Please enter a valid email.';
         return;
       }
 
-      if (data.duplicate) {
+      // UI state: lock button and set waiting flags
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+      inFlight = true;
+
+      // Single-use onload fallback: if postMessage never arrives, we still release the UI
+      const onLoadOnce = () => {
+        if (!inFlight) return; // already handled by postMessage
+        clearTimeout(ackTimer);
+
+        // Fallback optimistic message (exact status may arrive later via postMessage)
         modalMsg.className = 'msg ok';
-        modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
-        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Already subscribed.'; }
-      } else {
-        modalMsg.className = 'msg ok';
-        modalMsg.textContent = 'Thanks! You’re on the list.';
-        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
+        modalMsg.textContent = 'Request received — check your email shortly.';
+        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Request received.'; }
+
+        if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+        inFlight = false;
+      };
+      iframe.addEventListener('load', onLoadOnce, { once: true });
+
+      // Safety timeout (in case extensions block postMessage)
+      clearTimeout(ackTimer);
+      ackTimer = setTimeout(() => {
+        if (!inFlight) return;
+        modalMsg.className = 'msg err';
+        modalMsg.textContent = 'Still sending… If this hangs, try Incognito (extensions may block the response).';
+        if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+        inFlight = false;
+      }, 10000);
+      // IMPORTANT: do NOT preventDefault — the form must actually submit to the iframe
+    });
+
+    // Receive response from Apps Script via postMessage
+    window.addEventListener('message', (ev) => {
+      // Filter by origin (iframe gets recreated; source object changes)
+      if (!TRUSTED_ORIGINS.some(o => ev.origin && ev.origin.startsWith(o))) return;
+
+      const data = ev?.data;
+      if (!data || typeof data !== 'object') return;
+
+      clearTimeout(ackTimer);
+      inFlight = false;
+
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+
+      if (data.ok === false) {
+        modalMsg.className = 'msg err';
+        modalMsg.textContent = 'Something went wrong. Please try again.';
+        return;
       }
-      form.reset();
-    }
-  });
-</script>
 
+      // Quota exhausted: inform user emails will be sent later
+      if (data.ok === true && data.reason === 'quota_exhausted') {
+        modalMsg.className = 'msg ok';
+        modalMsg.textContent = 'Request accepted. We will email you later (email quota is temporarily exhausted).';
+        if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Accepted; email will be sent later.'; }
+        form.reset();
+        return;
+      }
 
-
+      // Normal success branches
+      if (data.ok === true) {
+        if (data.duplicate) {
+          modalMsg.className = 'msg ok';
+          modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
+          if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Already subscribed.'; }
+        } else {
+          modalMsg.className = 'msg ok';
+          modalMsg.textContent = 'Thanks! You’re on the list.';
+          if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
+        }
+        form.reset();
+      }
+    });
+  </script>
 </body>
 </html>
