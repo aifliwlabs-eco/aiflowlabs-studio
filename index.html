@@ -120,7 +120,7 @@
       <p class="modal-sub">Leave your name and email — we’ll notify you when early access opens.</p>
 
       <form id="waitlistForm"
-            action="https://script.google.com/macros/s/AKfycbzlG11NTavI8SI-zWLWWd134d5THoPkB6uGh18xJSGmeMtQG7f43_djVYag2Ix40tY/exec?pm=1"
+            action="https://script.google.com/macros/s/AKfycbzUGF34o1hPl8dL-JB6ZtbYgOf4pQhTovH8mzCach5ri3sQMbQ5GT_k5ycHKiblNBIw/exec?pm=1"
             method="POST"
             target="hidden_iframe"
             novalidate>
@@ -236,6 +236,7 @@
 
   // Ответ от Apps Script через postMessage
   window.addEventListener('message', (ev) => {
+    try { console.log('waitlist response:', ev.data); } catch(_) {}
     // Можно фильтровать только наш iframe:
     // if (ev.source !== iframe.contentWindow) return;
 
