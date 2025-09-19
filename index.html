@@ -143,29 +143,46 @@
     </div>
   </div>
 
-  <script>
+ <script>
   // ---- Modal open/close ----
   const openBtn = document.getElementById('openWaitlist');
   const modal   = document.getElementById('waitlistModal');
   const closeX  = modal.querySelector('.close-x');
-
-  openBtn.addEventListener('click', () => modal.classList.add('open'));
-  closeX.addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
   // ---- Form + hidden iframe + robust feedback ----
   const form     = document.getElementById('waitlistForm');
   const modalMsg = document.getElementById('modalMsg');
   const pageMsg  = document.getElementById('feedback');
   const iframe   = document.querySelector('iframe[name="hidden_iframe"]');
+  const hpField  = form.querySelector('input[name="company"]'); // honeypot
 
   let inFlight = false;
   let ackTimer = null;
 
+  function resetUI() {
+    clearTimeout(ackTimer);
+    inFlight = false;
+    modalMsg.className = 'msg';
+    modalMsg.textContent = '';
+    if (pageMsg) { pageMsg.className = 'msg'; pageMsg.textContent = ''; }
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+  }
+
+  openBtn.addEventListener('click', () => {
+    // Сброс honeypot и UI при каждом открытии
+    if (hpField) hpField.value = '';
+    resetUI();
+    modal.classList.add('open');
+  });
+
+  closeX.addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
   // Валидация и старт отправки
   form.addEventListener('submit', (e) => {
-    // honeypot
-    if (form.company.value) { e.preventDefault(); return; }
+    // Если honeypot вдруг чем-то заполнен (авто-заполнение) — очищаем и продолжаем
+    if (hpField && hpField.value) hpField.value = '';
 
     const name  = form.name.value.trim();
     const email = form.email.value.trim();
@@ -197,8 +214,8 @@
       clearTimeout(ackTimer);
 
       modalMsg.className = 'msg ok';
-      modalMsg.textContent = 'Request received — check your email shortly.';
-      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Request received.'; }
+      modalMsg.textContent = 'Заявка получена — проверьте почту в ближайшее время.';
+      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Заявка отправлена.'; }
 
       if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
       inFlight = false;
@@ -214,18 +231,21 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
       inFlight = false;
     }, 10000);
+    // ВАЖНО: не вызываем e.preventDefault(); форма должна реально отправиться в iframe
   });
 
   // Ответ от Apps Script через postMessage
   window.addEventListener('message', (ev) => {
-    // при желании фильтруй по source:
-    // if (ev.source !== document.querySelector('iframe[name="hidden_iframe"]').contentWindow) return;
+    // Можно фильтровать только наш iframe:
+    // if (ev.source !== iframe.contentWindow) return;
 
     const data = ev?.data;
     if (!data || typeof data !== 'object') return;
 
-    // Вернуть кнопку в норму
-    const btn = document.querySelector('#waitlistForm button[type="submit"]');
+    clearTimeout(ackTimer);
+    inFlight = false;
+
+    const btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
 
     if (data.ok === false) {
@@ -234,16 +254,14 @@
       return;
     }
 
-    // Если скрипт отработал, но письмо пользователю не ушло
-    if (data.ok === true && data.mailed === false) {
-      modalMsg.className = 'msg err';
-      modalMsg.textContent = 'Заявка получена, но письмо не доставлено. Проверьте адрес/спам или попробуйте другой email.';
-      if (pageMsg) { pageMsg.className = 'msg err'; pageMsg.textContent = 'Email delivery failed.'; }
-      return; // не сбрасываем форму — можно поправить email
-    }
-
-    // Обычные ветки
     if (data.ok === true) {
+      if (data.mailed === false) {
+        modalMsg.className = 'msg err';
+        modalMsg.textContent = 'Заявка получена, но письмо не доставлено. Проверьте адрес/спам или попробуйте другой email.';
+        if (pageMsg) { pageMsg.className = 'msg err'; pageMsg.textContent = 'Email delivery failed.'; }
+        return; // не сбрасываем форму
+      }
+
       if (data.duplicate) {
         modalMsg.className = 'msg ok';
         modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
@@ -253,10 +271,11 @@
         modalMsg.textContent = 'Thanks! You’re on the list.';
         if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
       }
-      document.getElementById('waitlistForm').reset();
+      form.reset();
     }
   });
 </script>
+
 
 
 </body>
