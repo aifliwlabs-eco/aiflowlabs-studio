@@ -191,12 +191,17 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     inFlight = true;
 
-    // Разовый onload: если postMessage не придёт, всё равно вернём кнопку
+    // Разовый onload: если postMessage не придёт, всё равно вернём кнопку + покажем fallback
     const onLoadOnce = () => {
       if (!inFlight) return; // уже обработано через postMessage
       clearTimeout(ackTimer);
+
+      modalMsg.className = 'msg ok';
+      modalMsg.textContent = 'Заявка получена — проверьте почту в ближайшее время.';
+      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Заявка отправлена.'; }
+
       if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
-      // Сообщение не трогаем — возможно postMessage прилетит чуть позже
+      inFlight = false;
     };
     iframe.addEventListener('load', onLoadOnce, { once: true });
 
@@ -213,7 +218,7 @@
 
   // Ответ от Apps Script через postMessage
   window.addEventListener('message', (ev) => {
-    // Если хочется жёстко фильтровать только наш iframe, раскомментируй строку ниже:
+    // Можно фильтровать только наш iframe:
     // if (ev.source !== iframe.contentWindow) return;
 
     const data = ev?.data;
@@ -245,6 +250,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
