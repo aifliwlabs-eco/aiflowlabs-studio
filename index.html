@@ -234,15 +234,23 @@
     // ВАЖНО: не вызываем e.preventDefault(); форма должна реально отправиться в iframe
   });
 
-  // Ответ от Apps Script через postMessage
+  const TRUSTED_ORIGINS = [
+    'https://script.google.com',
+    'https://script.googleusercontent.com',
+  ];
+
   window.addEventListener('message', (ev) => {
-    try { console.log('waitlist response:', ev.data); } catch(_) {}
-    // Можно фильтровать только наш iframe:
-    // if (ev.source !== iframe.contentWindow) return;
+    // ✅ Фильтруем по origin, а не по ev.source
+    if (!TRUSTED_ORIGINS.some(o => ev.origin && ev.origin.startsWith(o))) {
+      // Если хочешь — убери этот лог вовсе
+      // console.debug('ignoring postMessage from', ev.origin);
+      return;
+    }
 
     const data = ev?.data;
     if (!data || typeof data !== 'object') return;
 
+    // дальше твоя логика:
     clearTimeout(ackTimer);
     inFlight = false;
 
@@ -260,7 +268,7 @@
         modalMsg.className = 'msg err';
         modalMsg.textContent = 'Заявка получена, но письмо не доставлено. Проверьте адрес/спам или попробуйте другой email.';
         if (pageMsg) { pageMsg.className = 'msg err'; pageMsg.textContent = 'Email delivery failed.'; }
-        return; // не сбрасываем форму
+        return;
       }
 
       if (data.duplicate) {
