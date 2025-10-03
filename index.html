@@ -11,22 +11,15 @@
   <meta http-equiv="Expires" content="0" />
 
   <!-- Favicon -->
-<link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/img/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/img/android-chrome-512x512.png">
 
-<!-- Apple Touch -->
-<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
-
-<!-- Android / PWA -->
-<link rel="manifest" href="site.webmanifest">
-
-<!-- Larger icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="assets/img/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="assets/img/android-chrome-512x512.png">
-
-
-  <!-- Google Tag Manager (оставляем как рекомендует GTM) -->
+  <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -34,35 +27,34 @@
   })(window,document,'script','dataLayer','GTM-MZ733KQK');</script>
   <!-- End Google Tag Manager -->
 
-  <!-- styles -->
   <link rel="stylesheet" href="assets/css/site.css" />
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MZ733KQK"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <noscript><iframe
+    src="https://www.googletagmanager.com/ns.html?id=GTM-MZ733KQK"
+    height="0" width="0" style="display:none;visibility:hidden"
+    title="Google Tag Manager"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
   <div class="ribbon" aria-hidden="true"></div>
 
-  <main class="card" role="main">
+  <main class="card">
     <span class="logo"><b>AIFlow</b> Labs Studio</span>
     <h1>We’re launching soon</h1>
     <p class="lead"><span class="typing">AI agents • creative tools • applied research</span></p>
 
     <div class="row">
       <button id="openWaitlist" class="btn grad" type="button">Notify me</button>
-      <a id="ytLink" class="btn grad with-play" href="#" aria-label="AIFlow Labs Studio YouTube">
-        YouTube
-      </a>
+      <a id="ytLink" class="btn grad with-play" href="#" aria-label="AIFlow Labs Studio YouTube">YouTube</a>
     </div>
-    <div id="feedback" class="msg" role="status" aria-live="polite"></div>
+    <output id="feedback" class="msg" aria-live="polite"></output>
   </main>
 
   <footer>© 2025 aiflowlabs.studio</footer>
 
   <!-- Modal -->
-  <div id="waitlistModal" class="modal" role="dialog" aria-modal="true">
+  <dialog id="waitlistModal" class="modal" aria-modal="true">
     <div class="modal-card">
       <button class="close-x" type="button" aria-label="Close">✕</button>
       <div class="modal-title">Join the waitlist</div>
@@ -76,7 +68,6 @@
         <!-- Honeypot (must stay empty) -->
         <input type="text" name="company" tabindex="-1" autocomplete="off"
                style="position:absolute; left:-9999px; opacity:0" aria-hidden="true">
-        <!-- Explicit postMessage flag (duplicated in URL) -->
         <input type="hidden" name="pm" value="1">
 
         <div class="modal-actions">
@@ -85,14 +76,13 @@
           <button class="btn grad" type="submit">Send</button>
         </div>
 
-        <div id="modalMsg" class="msg" role="status" aria-live="polite"></div>
+        <output id="modalMsg" class="msg" aria-live="polite"></output>
       </form>
 
-      <iframe name="hidden_iframe" style="display:none;"></iframe>
+      <iframe name="hidden_iframe" style="display:none;" title="Hidden waitlist form target"></iframe>
     </div>
-  </div>
+  </dialog>
 
-  <!-- scripts -->
   <script src="assets/js/site.js" defer></script>
 </body>
 </html>

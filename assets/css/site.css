@@ -8,8 +8,9 @@ body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
   color:var(--text);
-  background: radial-gradient(1200px 900px at 70% -10%, #15203a 0%, transparent 60%),
-              linear-gradient(180deg,var(--bg-1),var(--bg-2));
+  background:
+    radial-gradient(1200px 900px at 70% -10%, #15203a 0%, transparent 60%),
+    linear-gradient(180deg,var(--bg-1),var(--bg-2));
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
 
@@ -39,20 +40,36 @@ body{
 }
 .logo b{
   background: linear-gradient(90deg,var(--grad-a),var(--grad-b),var(--grad-c));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 h1{
-  margin:18px 0 6px; font-size: clamp(28px, 5vw, 48px); line-height:1.05;
+  margin:18px 0 6px;
+  font-size: clamp(28px, 5vw, 48px);
+  line-height:1.05;
   background: linear-gradient(90deg,var(--grad-a),var(--grad-b));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
   animation: hue 10s linear infinite;
 }
 @keyframes hue{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
 
-.lead{ margin:0 auto 18px; max-width:60ch; color:var(--muted); font-size:clamp(15px,2.6vw,18px); }
-.typing{ display:inline-block; border-right:2px solid rgba(255,255,255,.7); white-space:nowrap; overflow:hidden; width:0; animation:type 3.8s steps(36,end) forwards,blink .9s step-end infinite;}
-@keyframes type{to{width:36ch}} @keyframes blink{50%{border-color:transparent}}
+.lead{
+  margin:0 auto 18px; max-width:60ch; color:var(--muted);
+  font-size:clamp(15px,2.6vw,18px);
+}
+.typing{
+  display:inline-block; border-right:2px solid rgba(255,255,255,.7);
+  white-space:nowrap; overflow:hidden; width:0;
+  animation:type 3.8s steps(36,end) forwards,blink .9s step-end infinite;
+}
+@keyframes type{to{width:36ch}}
+@keyframes blink{50%{border-color:transparent}}
 
 .row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px }
 
@@ -76,9 +93,24 @@ h1{
 
 footer{ position:fixed; bottom:14px; left:0; right:0; text-align:center; color:#94a2b8; font-size:12px }
 
-/* Modal */
-.modal{ position:fixed; inset:0; display:none; place-items:center; padding:20px; background:rgba(5,8,13,.55); backdrop-filter: blur(6px); z-index:50; }
-.modal.open{ display:grid }
+/* Modal (<dialog>) */
+.modal{
+  border: 0;
+  padding: 20px;
+  inset: 0;
+  display: none;           /* скрыто, пока нет [open] */
+  place-items: center;     /* центрируем .modal-card */
+  background: transparent; /* фон в ::backdrop */
+  z-index: 50;
+}
+.modal[open]{ display: grid; }
+
+/* затемнение и blur теперь на backdrop диалога */
+.modal::backdrop{
+  background: rgba(5,8,13,.55);
+  backdrop-filter: blur(6px);
+}
+
 .modal-card{
   width:min(460px,92vw); border-radius:16px; padding:22px; text-align:left; position:relative;
   background: rgba(255,255,255,.07);
