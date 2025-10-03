@@ -1,144 +1,180 @@
 // YouTube button (вместо inline onclick)
 document.addEventListener('DOMContentLoaded', () => {
-  const yt = document.getElementById('ytLink');
-  yt?.addEventListener('click', (e) => {
+  document.getElementById('ytLink')?.addEventListener('click', (e) => {
     e.preventDefault();
     alert('AIFlow Labs Studio YouTube channel is coming soon!');
   });
 });
 
-// --- Modal open/close ---
+// --- Ссылки на элементы ---
 const openBtn = document.getElementById('openWaitlist');
+/** @type {HTMLDialogElement|null} */
 const modal   = document.getElementById('waitlistModal');
-const closeX  = modal.querySelector('.close-x');
+const closeX  = modal?.querySelector('.close-x');
 
-// --- Form + hidden iframe + robust feedback ---
 const form     = document.getElementById('waitlistForm');
+/** @type {HTMLOutputElement|null} */
 const modalMsg = document.getElementById('modalMsg');
+/** @type {HTMLOutputElement|null} */
 const pageMsg  = document.getElementById('feedback');
 const iframe   = document.querySelector('iframe[name="hidden_iframe"]');
-const hpField  = form.querySelector('input[name="company"]'); // honeypot
+const hpField  = form?.querySelector('input[name="company"]'); // honeypot
 
 let inFlight = false;
 let ackTimer = null;
 
-function resetUI() {
-  clearTimeout(ackTimer);
-  inFlight = false;
-  modalMsg.className = 'msg';
-  modalMsg.textContent = '';
-  if (pageMsg) { pageMsg.className = 'msg'; pageMsg.textContent = ''; }
-  const btn = form.querySelector('button[type="submit"]');
+// --- утилиты сообщения UI ---
+function setOk(target, text) {
+  if (!target) return;
+  target.className = 'msg ok';
+  target.textContent = text;
+}
+function setErr(target, text) {
+  if (!target) return;
+  target.className = 'msg err';
+  target.textContent = text;
+}
+function setNeutral(target, text = '') {
+  if (!target) return;
+  target.className = 'msg';
+  target.textContent = text;
+}
+function submitBtn() {
+  return form?.querySelector('button[type="submit"]');
+}
+function lockSubmit() {
+  const btn = submitBtn();
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+}
+function unlockSubmit() {
+  const btn = submitBtn();
   if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
 }
 
-openBtn.addEventListener('click', () => {
-  if (hpField) hpField.value = ''; // clear honeypot on open
+function resetUI() {
+  clearTimeout(ackTimer);
+  inFlight = false;
+  setNeutral(modalMsg);
+  setNeutral(pageMsg);
+  unlockSubmit();
+}
+
+// --- Открытие/закрытие диалога (<dialog>) ---
+openBtn?.addEventListener('click', () => {
+  // чистим honeypot безопасно (optional chaining)
+  if (hpField?.value) hpField.value = '';
   resetUI();
-  modal.classList.add('open');
+
+  // нативно открыть диалог, иначе фолбэк на атрибут
+  (modal?.showModal?.() ?? modal?.setAttribute('open', ''));
 });
 
-closeX.addEventListener('click', () => modal.classList.remove('open'));
-modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+function closeModal() {
+  // нативно закрыть диалог, иначе снять атрибут
+  (modal?.close?.() ?? modal?.removeAttribute('open'));
+}
 
-// Allowed origins for Apps Script postMessage
+closeX?.addEventListener('click', closeModal);
+
+// Закрытие по клику на backdrop (клик строго по самому <dialog>, а не по .modal-card)
+modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+// --- Allowed origins for Apps Script postMessage ---
 const TRUSTED_ORIGINS = [
   'https://script.google.com',
   'https://script.googleusercontent.com',
 ];
 
-// Validation and submit start
-form.addEventListener('submit', (e) => {
-  // Never block on honeypot — just clear it (some extensions may autofill it)
-  if (hpField && hpField.value) hpField.value = '';
+// --- Валидация и отправка формы ---
+form?.addEventListener('submit', (e) => {
+  if (!form || !iframe) return;
+
+  // Никогда не блокируем по honeypot — просто очищаем (расширения могут авто-заполнить)
+  if (hpField?.value) hpField.value = '';
 
   const name  = form.name.value.trim();
   const email = form.email.value.trim();
 
-  modalMsg.className = 'msg';
-  modalMsg.textContent = '';
+  setNeutral(modalMsg);
 
   if (!name) {
     e.preventDefault();
-    modalMsg.classList.add('err');
-    modalMsg.textContent = 'Please enter your name.';
+    setErr(modalMsg, 'Please enter your name.');
     return;
   }
   if (!/^\S+@\S+\.\S+$/.test(email)) {
     e.preventDefault();
-    modalMsg.classList.add('err');
-    modalMsg.textContent = 'Please enter a valid email.';
+    setErr(modalMsg, 'Please enter a valid email.');
     return;
   }
 
-  // UI state: lock button and set waiting flags
-  const btn = form.querySelector('button[type="submit"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  lockSubmit();
   inFlight = true;
 
-  // Single-use onload fallback
+  // Fallback: если postMessage не придёт, onload iframe снимет «ожидание»
   const onLoadOnce = () => {
-    if (!inFlight) return; // already handled by postMessage
+    if (!inFlight) return; // уже обработано postMessage
     clearTimeout(ackTimer);
-
-    modalMsg.className = 'msg ok';
-    modalMsg.textContent = 'Request received — check your email shortly.';
-    if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Request received.'; }
-
-    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+    setOk(modalMsg, 'Request received — check your email shortly.');
+    setOk(pageMsg,  'Request received.');
+    unlockSubmit();
     inFlight = false;
   };
   iframe.addEventListener('load', onLoadOnce, { once: true });
 
-  // Safety timeout
+  // Safety-таймер
   clearTimeout(ackTimer);
   ackTimer = setTimeout(() => {
     if (!inFlight) return;
-    modalMsg.className = 'msg err';
-    modalMsg.textContent = 'Still sending… If this hangs, try Incognito (extensions may block the response).';
-    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+    setErr(modalMsg, 'Still sending… If this hangs, try Incognito (extensions may block the response).');
+    unlockSubmit();
     inFlight = false;
   }, 10000);
-  // do NOT preventDefault — we need the form to submit to the iframe
+
+  // ВАЖНО: не preventDefault — форма должна отправиться в iframe
 });
 
-// Receive response from Apps Script via postMessage
+// --- Ответ от Apps Script через postMessage ---
 window.addEventListener('message', (ev) => {
-  if (!TRUSTED_ORIGINS.some(o => ev.origin && ev.origin.startsWith(o))) return;
+  // 1) Жёстко валидируем origin (строгое совпадение)
+  if (!ev.origin) return;
+  const originOk = TRUSTED_ORIGINS.includes(ev.origin);
+  if (!originOk) return;
+
+  // 2) Проверяем, что сообщение пришло именно из нашего hidden iframe
+  if (iframe && ev.source !== iframe.contentWindow) return;
 
   const data = ev?.data;
   if (!data || typeof data !== 'object') return;
 
   clearTimeout(ackTimer);
   inFlight = false;
+  unlockSubmit();
 
-  const btn = form.querySelector('button[type="submit"]');
-  if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+  // Ветвление вынесено в маленькие функции, чтобы снизить сложность
+  const handleQuota = () => {
+    setOk(modalMsg, 'Request accepted. We will email you later (email quota is temporarily exhausted).');
+    setOk(pageMsg,  'Accepted; email will be sent later.');
+    form?.reset();
+  };
+  const handleSuccess = (duplicate) => {
+    setOk(modalMsg, duplicate
+      ? 'You’re already on the list — we’ll keep you posted.'
+      : 'Thanks! You’re on the list.'
+    );
+    setOk(pageMsg, duplicate ? 'Already subscribed.' : 'Subscription confirmed.');
+    form?.reset();
+  };
 
   if (data.ok === false) {
-    modalMsg.className = 'msg err';
-    modalMsg.textContent = 'Something went wrong. Please try again.';
+    setErr(modalMsg, 'Something went wrong. Please try again.');
     return;
   }
-
   if (data.ok === true && data.reason === 'quota_exhausted') {
-    modalMsg.className = 'msg ok';
-    modalMsg.textContent = 'Request accepted. We will email you later (email quota is temporarily exhausted).';
-    if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Accepted; email will be sent later.'; }
-    form.reset();
+    handleQuota();
     return;
   }
-
   if (data.ok === true) {
-    if (data.duplicate) {
-      modalMsg.className = 'msg ok';
-      modalMsg.textContent = 'You’re already on the list — we’ll keep you posted.';
-      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Already subscribed.'; }
-    } else {
-      modalMsg.className = 'msg ok';
-      modalMsg.textContent = 'Thanks! You’re on the list.';
-      if (pageMsg) { pageMsg.className = 'msg ok'; pageMsg.textContent = 'Subscription confirmed.'; }
-    }
-    form.reset();
+    handleSuccess(Boolean(data.duplicate));
   }
 });
