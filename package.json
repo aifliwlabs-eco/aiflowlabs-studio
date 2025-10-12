@@ -1,0 +1,38 @@
+{
+  "name": "aiflowlabs-studio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "node -e \"const fs=require(\\\"fs\\\");const v=process.version.replace(/^v/,\\\"\\\");const r=fs.readFileSync(\\\".nvmrc\\\",\\\"utf8\\\").trim().replace(/^v/,\\\"\\\");if(v.startsWith(r)){process.exit(0)}console.error(\\\"Expected Node \\\"+r+\\\", got v\\\"+v);process.exit(1)\"",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"(add ESLint later)\" && exit 0",
+    "build": "echo \"(add framework build later)\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aifliwlabs-eco/aiflowlabs-studio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aifliwlabs-eco/aiflowlabs-studio/issues"
+  },
+  "homepage": "https://github.com/aifliwlabs-eco/aiflowlabs-studio#readme",
+  "dependencies": {
+    "puppeteer": "^24.23.0"
+  },
+  "engines": {
+    "node": "24.4.x",
+    "npm": "11.4.x"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "typescript": "^5.9.3"
+  }
+}
