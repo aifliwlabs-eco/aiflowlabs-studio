@@ -12,7 +12,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default [
   // Игноры (заменяют .eslintignore)
-  { ignores: ["node_modules", ".next", "dist", "out", "coverage", "eslint.config.mjs"] },
+  {
+    ignores: [
+      "node_modules",
+      ".next",
+      "dist",
+      "out",
+      "coverage",
+      ".eslintignore",
+      "package-lock.json",
+      "package.json",
+      "lint-staged.config.*",
+      ".husky",
+    ],
+  },
 
   // ===== JS: только .js/.jsx/.mjs/.cjs — без TS-парсера =====
   {
