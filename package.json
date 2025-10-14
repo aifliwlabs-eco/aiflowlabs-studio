@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "preinstall": "node -e \"const fs=require(\\\"fs\\\");const v=process.version.replace(/^v/,\\\"\\\");const r=fs.readFileSync(\\\".nvmrc\\\",\\\"utf8\\\").trim().replace(/^v/,\\\"\\\");if(v.startsWith(r)){process.exit(0)}console.error(\\\"Expected Node \\\"+r+\\\", got v\\\"+v);process.exit(1)\"",
     "type-check": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
     "build": "echo \"(add framework build later)\" && exit 0",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
