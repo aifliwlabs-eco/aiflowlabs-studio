@@ -12,21 +12,14 @@
 
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
+
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "assets",
 
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force"
   },
-  "include": [
-    "next-env.d.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
+  "include": ["src/**/*", "next-env.d.ts"],
   "exclude": ["node_modules", ".next", "dist", "out"]
 }

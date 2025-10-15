@@ -24,6 +24,8 @@ export default [
       "package.json",
       "lint-staged.config.*",
       ".husky",
+      "assets/**/*.js",
+      "assets/**/*.js.map",
     ],
   },
 
@@ -68,6 +70,7 @@ export default [
         tsconfigRootDir: __dirname,
       },
     },
+    // sonarlint-disable-next-line javascript:S7744
     plugins: { ...(cfg.plugins ?? {}), react, "react-hooks": reactHooks },
     rules: {
       ...(cfg.rules ?? {}),

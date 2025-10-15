@@ -5,3 +5,6 @@ out/
 coverage/
 .eslintcache
 .DS_Store
+# analysis artifacts
+repo-structure.txt
+js-files.txt
