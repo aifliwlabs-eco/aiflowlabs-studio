@@ -1,3 +1,7 @@
-*.ts  linguist-detectable=true
+# --- Force GitHub to count TypeScript as main language ---
+*.ts linguist-detectable=true
 *.tsx linguist-detectable=true
-*.js  linguist-detectable=false
+*.js linguist-detectable=false
+*.html linguist-detectable=false
+*.css linguist-detectable=false
+assets/** linguist-detectable=false
