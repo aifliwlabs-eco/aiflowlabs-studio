@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "assets",
+    "target": "ES2022",
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "sourceMap": true
+  },
+  "include": ["src/site.ts"]
+}
