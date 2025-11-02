@@ -8,3 +8,17 @@ coverage/
 # analysis artifacts
 repo-structure.txt
 js-files.txt
+# Next / build
+.next/
+out/
+dist/
+*.log
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+

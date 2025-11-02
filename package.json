@@ -3,17 +3,22 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "preinstall": "node -e \"const fs=require('fs');const v=process.version.replace(/^v/,'');const r=fs.readFileSync('.nvmrc','utf8').trim().replace(/^v/,'');if(v.startsWith(r)){process.exit(0)}console.error('Expected Node '+r+', got v'+v);process.exit(1)\"",
     "type-check": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint . --cache",
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "eslint .",
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "build:static": "next build",
+    "start": "next start",
     "clean": "Remove-Item -Path assets\\*.js -Force -ErrorAction SilentlyContinue",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "prepare": "husky",
-    "verify": "npm run type-check && npm run lint && npm run build"
+    "verify": "npm run type-check && npm run lint && npm run build",
+    "audit": "node scripts/audit.mjs",
+    "prepush": "npm run lint && npm run type-check && npm run build"
   },
   "repository": {
     "type": "git",
@@ -22,17 +27,27 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/aifliwlabs-eco/aiflowlabs-studio/issues"
   },
   "homepage": "https://github.com/aifliwlabs-eco/aiflowlabs-studio#readme",
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.546.0",
+    "next": "^15.5.6",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1",
     "puppeteer": "^24.23.0"
   },
   "engines": {
     "node": "24.4.x",
-    "npm": "11.4.x"
+    "npm": ">=11.4 <12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -41,6 +56,7 @@
     "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.37.0",
     "eslint-config-next": "^15.5.4",
     "eslint-config-prettier": "^10.1.8",
@@ -52,8 +68,18 @@
     "i": "^0.3.7",
     "lint-staged": "^16.2.4",
     "npm": "^11.6.2",
+    "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.18",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md,json}": "prettier --write"
   }
 }

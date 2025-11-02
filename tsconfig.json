@@ -1,25 +1,35 @@
 {
   "compilerOptions": {
+    // Базовые таргеты Next 15
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "jsx": "preserve",
-
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-
+    "jsx": "preserve",
+    // Важно для Next/TS
     "strict": true,
     "skipLibCheck": true,
-
-    "noEmit": false,
-    "rootDir": "src",
-    "outDir": "assets",
-
+    "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force"
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    // Для Next сборки TS-эмит не нужен
+    "noEmit": true,
+    // Алиасы (исправляет '@/components/Card')
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    // Плагины Next
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true,
+    "incremental": true
   },
-  "include": ["src/**/*", "next-env.d.ts"],
-  "exclude": ["node_modules", ".next", "dist", "out"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

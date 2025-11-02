@@ -1,0 +1,53 @@
+{
+  "name": "AIFlow Labs Studio",
+  "short_name": "AFLS",
+  "icons": [
+    {
+      "src": "assets/img/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/img/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#4B0082",
+  "background_color": "#0A0A0A",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Join Waitlist",
+      "short_name": "Waitlist",
+      "description": "Subscribe to the AIFlow Labs Studio waitlist.",
+      "url": "/#waitlist",
+      "icons": [{ "src": "assets/img/favicon-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "Support",
+      "short_name": "Support",
+      "description": "Contact AIFlow Labs Studio support team.",
+      "url": "/#contact",
+      "icons": [{ "src": "assets/img/favicon-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "Website",
+      "short_name": "Website",
+      "description": "Open the AIFlow Labs Studio homepage.",
+      "url": "/",
+      "icons": [{ "src": "assets/img/favicon-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "YouTube",
+      "short_name": "YouTube",
+      "description": "Visit the official YouTube channel.",
+      "url": "/#youtube",
+      "icons": [{ "src": "assets/img/favicon-32x32.png", "sizes": "32x32" }]
+    }
+  ]
+}

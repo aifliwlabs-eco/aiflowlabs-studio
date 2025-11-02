@@ -1,1 +1,2 @@
-npm run lint && npm run type-check && npm run build
+#!/usr/bin/env sh
+npm run prepush
