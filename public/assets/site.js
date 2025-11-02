@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // public/assets/site.js
 // --- YouTube button (neon toast style, single click) ---
 

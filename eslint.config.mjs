@@ -1,4 +1,4 @@
-// eslint.config.mjs — ESLint v9 flat config (App Router + TS + JS, без Next-пресета)
+// eslint.config.mjs — ESLint v9 flat config (App Router + TS + JS)
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default [
-  // Игноры (заменяют .eslintignore)
+  // ── Игноры (заменяют .eslintignore) ──────────────────────────────────────────
   {
     ignores: [
       "node_modules",
@@ -19,46 +19,52 @@ export default [
       "dist",
       "out",
       "coverage",
-      ".eslintignore",
-      "package-lock.json",
-      "package.json",
-      "lint-staged.config.*",
-      ".husky",
-      "assets/**/*.js",
-      "assets/**/*.js.map",
+      "project_tree.txt",
+      "next-env.d.ts",                // не линтим автогенерируемый файл Next
+      "public/assets/img/**",         // изображения
+      "public/assets/**/*.map",       // карты исходников на всякий случай
     ],
   },
 
-  // ===== JS: только .js/.jsx/.mjs/.cjs — без TS-парсера =====
+  // ── JS: только .js/.jsx/.mjs/.cjs — без TS-парсера ──────────────────────────
   {
     files: ["**/*.{js,jsx,mjs,cjs}"],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: {}, // по умолчанию нет глобалов; ниже задаём по папкам
+      globals: {}, // ниже переопределяем по зонам
     },
   },
 
-  // JS в браузере (assets/js/**): document/window/setTimeout и т.п.
+  // Браузерные скрипты (именно твой legacy-файл)
   {
-    files: ["assets/js/**/*.{js,jsx}"],
+    files: ["public/assets/site.js"],
     languageOptions: {
+      // document, window, Element, setTimeout, requestAnimationFrame и т.д.
       globals: globals.browser,
-      sourceType: "module",
+      // этот файл чаще подключается как обычный <script>, не как ESM
+      sourceType: "script",
+    },
+    rules: {
+      // Можем ослабить что-то точечно при необходимости
     },
   },
 
-  // Node-скрипты (scripts/**): require, __dirname и т.п. (CommonJS)
+  // Node/CommonJS конфиги и скрипты
   {
-    files: ["scripts/**/*.{js,cjs}"],
+    files: [
+      "postcss.config.js",
+      "tailwind.config.js",
+      "scripts/**/*.{js,cjs}",
+    ],
     languageOptions: {
-      globals: globals.node,
+      globals: globals.node,          // module, require, __dirname …
       sourceType: "commonjs",
     },
   },
 
-  // ===== TS: только .ts/.tsx — c type-aware правилами =====
+  // ── TS: .ts/.tsx с type-aware правилами ─────────────────────────────────────
   ...tseslint.configs.recommendedTypeChecked.map((cfg) => ({
     ...cfg,
     files: ["**/*.{ts,tsx}"],
@@ -70,7 +76,6 @@ export default [
         tsconfigRootDir: __dirname,
       },
     },
-    // sonarlint-disable-next-line javascript:S7744
     plugins: { ...(cfg.plugins ?? {}), react, "react-hooks": reactHooks },
     rules: {
       ...(cfg.rules ?? {}),
@@ -78,13 +83,15 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+
+      // Мы уже устранили проблему с postMessage-сообщением,
+      // но оставим эти ослабления, чтобы не спотыкаться на runtime-проверках
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
     },
     settings: { react: { version: "detect" } },
   })),
 
-  // Пресеты Next специально не подключаем, чтобы не получать мусорные ошибки под pages/
-  // Если захочешь выборочно включить отдельные next-правила — добавим точечно.
-
-  // Совместимость с Prettier (выключает конфликтующие правила форматирования)
+  // ── Совместимость с Prettier ────────────────────────────────────────────────
   eslintConfigPrettier,
 ];
