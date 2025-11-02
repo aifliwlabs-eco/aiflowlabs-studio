@@ -70,12 +70,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           `}
         </Script>
 
-        <Script
-          src="/assets/site.js?v=4"
-          type="module"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
+        {/* legacy site script, load after parse */}
+        <script src="/assets/site.js?v=5" defer />
+
 
         <noscript>
           <iframe
