@@ -20,9 +20,9 @@ export default [
       "out",
       "coverage",
       "project_tree.txt",
-      "next-env.d.ts",                // не линтим автогенерируемый файл Next
-      "public/assets/img/**",         // изображения
-      "public/assets/**/*.map",       // карты исходников на всякий случай
+      "next-env.d.ts", // не линтим автогенерируемый файл Next
+      "public/assets/img/**", // изображения
+      "public/assets/**/*.map", // карты исходников
     ],
   },
 
@@ -33,25 +33,20 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: {}, // ниже переопределяем по зонам
+      // глобалы задаём ниже по зонам (browser/node)
     },
   },
 
-  // Браузерные скрипты (именно твой legacy-файл)
+  // ── Браузерные скрипты (legacy site.js) ─────────────────────────────────────
   {
     files: ["public/assets/site.js"],
     languageOptions: {
-      // document, window, Element, setTimeout, requestAnimationFrame и т.д.
-      globals: globals.browser,
-      // этот файл чаще подключается как обычный <script>, не как ESM
+      globals: globals.browser, // document, window, setTimeout и т.д.
       sourceType: "script",
-    },
-    rules: {
-      // Можем ослабить что-то точечно при необходимости
     },
   },
 
-  // Node/CommonJS конфиги и скрипты
+  // ── Node/CommonJS конфиги и скрипты ─────────────────────────────────────────
   {
     files: [
       "postcss.config.js",
@@ -59,7 +54,7 @@ export default [
       "scripts/**/*.{js,cjs}",
     ],
     languageOptions: {
-      globals: globals.node,          // module, require, __dirname …
+      globals: globals.node, // module, require, __dirname …
       sourceType: "commonjs",
     },
   },
@@ -76,16 +71,16 @@ export default [
         tsconfigRootDir: __dirname,
       },
     },
-    plugins: { ...(cfg.plugins ?? {}), react, "react-hooks": reactHooks },
+    // Без лишних {} — SonarLint не ругается
+    plugins: { ...cfg.plugins, react, "react-hooks": reactHooks },
     rules: {
-      ...(cfg.rules ?? {}),
+      ...cfg.rules,
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
 
-      // Мы уже устранили проблему с postMessage-сообщением,
-      // но оставим эти ослабления, чтобы не спотыкаться на runtime-проверках
+      // Ослабления для postMessage и прочих runtime-типов
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
     },

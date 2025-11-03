@@ -62,15 +62,12 @@
     showYouTubeNotice();
   }
 
-  // Ждём готовности DOM (с defer и так ок, но пусть будет надёжно)
-  window.addEventListener("DOMContentLoaded", () => {
-    // Пробуем навесить напрямую (если элемент уже есть)
+  globalThis.addEventListener("DOMContentLoaded", () => {
     const a = document.getElementById("ytLink");
     if (a && !a.dataset.bound) {
       a.addEventListener("click", onYouTubeClick, { passive: true });
       a.dataset.bound = "1";
     }
-    // Плюс делегирование на документ — на случай ре-рендеров
     document.addEventListener("click", onYouTubeClick, { passive: true });
   });
 })();
