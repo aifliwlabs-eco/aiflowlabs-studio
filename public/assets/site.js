@@ -1,18 +1,19 @@
 /* eslint-env browser */
-// public/assets/site.js — v7
+// public/assets/site.js — v9 (simple toast on YouTube button)
+
 (function () {
   // Маркер, что файл реально загрузился
-  console.log("[site.js] loaded v8");
+  console.log("[site.js] loaded v9");
 
   function showYouTubeNotice() {
-    // Remove any existing toasts
+    // убрать старый тост, если вдруг висит
     const old = document.getElementById("yt-toast");
     if (old) old.remove();
 
-    // Create a toast-like message (uses your CSS vars)
     const toast = document.createElement("div");
     toast.id = "yt-toast";
     toast.textContent = "AIFlow Labs Studio YouTube channel is coming soon!";
+
     Object.assign(toast.style, {
       position: "fixed",
       bottom: "28px",
@@ -35,13 +36,13 @@
 
     document.body.appendChild(toast);
 
-    // Fade in
+    // fade in
     requestAnimationFrame(() => {
       toast.style.opacity = "1";
       toast.style.transform = "translateX(-50%) translateY(-4px)";
     });
 
-    // Fade out and remove
+    // fade out
     setTimeout(() => {
       toast.style.opacity = "0";
       toast.style.transform = "translateX(-50%) translateY(4px)";
@@ -49,28 +50,22 @@
     }, 3000);
   }
 
-  function onYouTubeClick(e) {
-    // Ищем ближайшую ссылку с id="ytLink"
-    const target = e.target instanceof Element ? e.target.closest("#ytLink") : null;
-    if (!target) return;
+  function bindYouTubeToast() {
+    const btn = document.getElementById("ytLink");
+    if (!btn) return;
+    if (btn.dataset.bound === "1") return;
 
-    // Не перехватываем модифицированные клики (новая вкладка и т.д.)
-    if (e.button !== 0 /* не левый клик */) return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    btn.addEventListener("click", () => {
+      showYouTubeNotice();
+    });
 
-    e.preventDefault();
-    showYouTubeNotice();
+    btn.dataset.bound = "1";
   }
 
-  // Используем globalThis, как просит Sonar
-  globalThis.addEventListener("DOMContentLoaded", () => {
-    const a = document.getElementById("ytLink");
-    if (a && !a.dataset.bound) {
-      // без { passive: true }
-      a.addEventListener("click", onYouTubeClick);
-      a.dataset.bound = "1";
-    }
-    // Делегирование тоже без passive
-    document.addEventListener("click", onYouTubeClick);
-  });
+  // если DOM уже готов — вешаем сразу
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindYouTubeToast);
+  } else {
+    bindYouTubeToast();
+  }
 })();
