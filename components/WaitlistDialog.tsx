@@ -17,7 +17,6 @@ type MsgState = { type: "ok" | "err" | "neutral"; text: string };
 
 export function WaitlistDialog() {
   const formRef = React.useRef<HTMLFormElement | null>(null);
-  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const submittingRef = React.useRef(false);
 
   const [msg, setMsg] = React.useState<MsgState>({
@@ -45,29 +44,24 @@ export function WaitlistDialog() {
     return () => btn?.removeEventListener("click", onClick);
   }, []);
 
-  // слушаем загрузку скрытого iframe: это сигнал, что POST в скрипт завершён
-  React.useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
+  // обработчик загрузки iframe — сигнал, что запрос в Apps Script завершён
+  const handleIframeLoad = React.useCallback(() => {
+    // Чтобы не реагировать на первую/случайную загрузку
+    if (!submittingRef.current) {
+      return;
+    }
 
-    const handleLoad = () => {
-      // срабатывает при любой загрузке iframe
-      if (!submittingRef.current) return; // игнорируем первые/случайные загрузки
+    // Это как раз ответ на наш submit
+    submittingRef.current = false;
+    setBusy(false);
 
-      submittingRef.current = false;
-      setBusy(false);
+    setMsg({
+      type: "ok",
+      text: "Thanks! Check your inbox, we’ve just sent you a message.",
+    });
 
-      // оптимистично считаем, что всё прошло хорошо
-      setMsg({
-        type: "ok",
-        text: "Thanks! Check your inbox, we’ve just sent you a message.",
-      });
-      formRef.current?.reset();
-      setTimeout(() => setOpen(false), 900);
-    };
-
-    iframe.addEventListener("load", handleLoad);
-    return () => iframe.removeEventListener("load", handleLoad);
+    formRef.current?.reset();
+    setTimeout(() => setOpen(false), 900);
   }, []);
 
   // класс статуса без вложенных тернарников
@@ -146,7 +140,7 @@ export function WaitlistDialog() {
               return;
             }
 
-            // даём форме реально уйти в iframe
+            // Форма реально отправляется в iframe
             submittingRef.current = true;
             setBusy(true);
           }}
@@ -161,7 +155,7 @@ export function WaitlistDialog() {
             aria-hidden="true"
           />
 
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-[10px] tw-mt-[14px]">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-[10px] tw-mт-[14px]">
             <div className="tw-flex-1 min-[380px]:tw-flex-initial min-[380px]:tw-basis-[45%]">
               <Label htmlFor="wl-name" className="tw-sr-only">
                 Your name
@@ -215,12 +209,12 @@ export function WaitlistDialog() {
             {msg.text}
           </output>
 
-          {/* скрытый iframe — приём ответа, только по onload */}
+          {/* скрытый iframe — приём ответа, только по onLoad */}
           <iframe
-            ref={iframeRef}
             name={iframeName}
             style={{ display: "none" }}
             title="Hidden waitlist form target"
+            onLoad={handleIframeLoad}
           />
         </form>
       </DialogContent>
