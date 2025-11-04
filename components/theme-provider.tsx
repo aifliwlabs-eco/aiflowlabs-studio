@@ -4,15 +4,21 @@
 import * as React from "react";
 import {
   ThemeProvider as NextThemesProvider,
-  type ThemeProviderProps as NextThemesProviderProps,
 } from "next-themes";
 
-// Разрешаем ровно те пропсы, которые передаёшь из layout
+// Только children, без лишних пропсов
 export type ThemeProviderProps = Readonly<{
   children: React.ReactNode;
-}> &
-  Pick<NextThemesProviderProps, "attribute" | "defaultTheme" | "enableSystem">;
+}>;
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }

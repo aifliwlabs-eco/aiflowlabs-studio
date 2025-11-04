@@ -1,8 +1,8 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "aiflowlabs.studio — Coming Soon",
@@ -34,6 +34,7 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+// Цвет статус-бара и т.п.
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
@@ -41,20 +42,24 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Кеш-контроль как раньше */}
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
-        {/* 1) legacy, 2) Tailwind */}
+
+        {/* 1) Tailwind (tw.css), 2) legacy (legacy.css) */}
         <link rel="stylesheet" href="/assets/css/tw.css?v=2" />
         <link rel="stylesheet" href="/assets/css/legacy.css?v=3" />
       </head>
 
       <body className="tw-min-h-dvh tw-bg-white tw-text-neutral-900 antialiased dark:tw-bg-neutral-950 dark:tw-text-neutral-100">
-        {/* GTM */}
+        {/* Google Tag Manager */}
         <Script id="gtm-init" strategy="afterInteractive">
           {`
             (function (w, d, s, l, i) {
@@ -70,15 +75,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           `}
         </Script>
 
-        {/* legacy site script, load after parse */}
+        {/* Твой site.js с YouTube-тостом и звуком */}
         <Script
-          src="/assets/site.js?v=9"
-          type="module"
+          src="/assets/site.js?v=13"
           strategy="afterInteractive"
           crossOrigin="anonymous"
         />
-
-
 
         <noscript>
           <iframe
@@ -90,12 +92,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           />
         </noscript>
 
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ThemeToggle />
+        {/* Тёмная тема зафиксирована внутри ThemeProvider */}
+        <ThemeProvider>
+          {/* ThemeToggle больше не нужен, раз светлой темы нет */}
           {children}
         </ThemeProvider>
 
-        {/* Временный блок для #logo-pill можно удалить, если перенесёшь в legacy.css */}
+        {/* Временный inline-стиль для #logo-pill (по вкусу можно перенести в legacy.css) */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
