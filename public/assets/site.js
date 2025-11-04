@@ -1,19 +1,54 @@
 /* eslint-env browser */
-// public/assets/site.js — v9 (simple toast on YouTube button)
+// public/assets/site.js — v11 (toast + animation + soft click sound + delayed redirect)
 
 (function () {
-  // Маркер, что файл реально загрузился
-  console.log("[site.js] loaded v9");
+  console.log("[site.js] loaded v11");
 
+  // ---- tiny click sound via Web Audio API ----
+  /** @type {AudioContext | null} */
+  let clickAudioCtx = null;
+
+  function playClickSound() {
+    try {
+      const AudioCtxCtor =
+        globalThis.AudioContext || globalThis.webkitAudioContext;
+      if (!AudioCtxCtor) return;
+
+      if (!clickAudioCtx) {
+        clickAudioCtx = new AudioCtxCtor();
+      }
+      const ctx = clickAudioCtx;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      // лёгкий "ping"
+      const now = ctx.currentTime;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(660, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } catch {
+      // молча игнорируем, если браузер ругнётся
+    }
+  }
+
+  // ---- toast ----
   function showYouTubeNotice() {
-    // убрать старый тост, если вдруг висит
     const old = document.getElementById("yt-toast");
     if (old) old.remove();
 
     const toast = document.createElement("div");
     toast.id = "yt-toast";
     toast.textContent = "AIFlow Labs Studio YouTube channel is coming soon!";
-
     Object.assign(toast.style, {
       position: "fixed",
       bottom: "28px",
@@ -50,21 +85,54 @@
     }, 3000);
   }
 
+  // ---- button micro animation ----
+  function buttonClickFeedback(btn) {
+    if (!btn.animate) return;
+    btn.animate(
+      [
+        { transform: "scale(1)", filter: "brightness(1)" },
+        { transform: "scale(0.94)", filter: "brightness(1.1)" },
+        { transform: "scale(1)", filter: "brightness(1)" },
+      ],
+      {
+        duration: 200,
+        easing: "ease-out",
+      }
+    );
+  }
+
+  // ---- main binding ----
   function bindYouTubeToast() {
     const btn = document.getElementById("ytLink");
-    if (!btn) return;
-    if (btn.dataset.bound === "1") return;
+    if (!btn || btn.dataset.bound === "1") return;
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      // только обычный левый клик, без модификаторов
+      if (e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      e.preventDefault();
+
+      buttonClickFeedback(btn);
+      playClickSound();
       showYouTubeNotice();
+
+      const href = btn.getAttribute("href");
+      const target = btn.getAttribute("target") || "_self";
+
+      if (href) {
+        // даём анимации/звуку/тосту чуть сыграть
+        setTimeout(() => {
+          window.open(href, target);
+        }, 350);
+      }
     });
 
     btn.dataset.bound = "1";
   }
 
-  // если DOM уже готов — вешаем сразу
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bindYouTubeToast);
+    globalThis.addEventListener("DOMContentLoaded", bindYouTubeToast);
   } else {
     bindYouTubeToast();
   }
