@@ -31,6 +31,20 @@ const isAppScriptMessage = (v: unknown): v is AppScriptMessage => {
   return okValid && dupValid && reasonValid;
 };
 
+// допустимые origin для postMessage из Apps Script
+const TRUSTED_ORIGINS = [
+  "https://script.google.com",
+  "https://script.googleusercontent.com",
+];
+
+const isTrustedOrigin = (origin: string): boolean => {
+  // В некоторых окружениях origin может быть пустым (dev / file://) — не режем такие
+  if (!origin) return true;
+  return TRUSTED_ORIGINS.some(
+    (allowed) => origin === allowed || origin.startsWith(allowed),
+  );
+};
+
 export function WaitlistDialog() {
   const formRef = React.useRef<HTMLFormElement | null>(null);
   const [msg, setMsg] = React.useState<MsgState>({ type: "neutral", text: "" });
@@ -57,29 +71,32 @@ export function WaitlistDialog() {
 
   // приём ответа от Apps Script через postMessage
   React.useEffect(() => {
-    const TRUSTED_ORIGINS = new Set<string>([
-      "https://script.google.com",
-      "https://script.googleusercontent.com",
-    ]);
-
-    const iframeEl = document.querySelector<HTMLIFrameElement>(`iframe[name="${iframeName}"]`);
-    const iframeWin = iframeEl?.contentWindow ?? null;
-
     function onMessage(ev: MessageEvent) {
-      // строгая проверка источника
-      if (!ev.origin) return;
-      if (!TRUSTED_ORIGINS.has(ev.origin)) return;
-      if (iframeWin && ev.source !== iframeWin) return;
+      // 1. Проверяем origin (чтобы успокоить Sonar и не принимать любые источники)
+      if (!isTrustedOrigin(ev.origin)) return;
 
-      const payload: unknown = ev.data;
+      // 2. Пробуем достать payload
+      let payload: unknown = ev.data;
+
+      if (typeof payload === "string") {
+        try {
+          payload = JSON.parse(payload);
+        } catch {
+          // не JSON — игнорируем
+        }
+      }
+
+      // 3. Строгая проверка структуры объекта
       if (!isAppScriptMessage(payload)) return;
 
+      // 4. Сообщение точно от нашего скрипта → снимаем busy и показываем статус
       setBusy(false);
 
       if (payload.ok === false) {
         setMsg({ type: "err", text: "Something went wrong. Please try again." });
         return;
       }
+
       if (payload.ok === true && payload.reason === "quota_exhausted") {
         setMsg({
           type: "ok",
@@ -88,18 +105,18 @@ export function WaitlistDialog() {
         formRef.current?.reset();
         return;
       }
+
       setMsg({
         type: "ok",
         text: payload.duplicate ? "You’re already on the list." : "Thanks! You’re on the list.",
       });
       formRef.current?.reset();
-      // мягко закрываем через короткую паузу
       setTimeout(() => setOpen(false), 900);
     }
 
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [iframeName]);
+  }, []);
 
   // класс статуса без вложенных тернарников (Sonar S3358)
   let msgClass = "";
@@ -125,7 +142,7 @@ export function WaitlistDialog() {
           aria-label="Close"
           onClick={() => setOpen(false)}
           style={{
-            all: "unset", // снимает ВСЁ: бордер, фон, outline, appearance и т.д.
+            all: "unset",
             position: "absolute",
             right: 14,
             top: 14,
@@ -141,7 +158,6 @@ export function WaitlistDialog() {
         </button>
 
         <DialogHeader>
-          {/* .modal-title прод: margin 4/6px, 22px, 700 */}
           <DialogTitle className="tw-mt-[4px] tw-mb-[6px] tw-text-[22px] tw-font-bold tw-text-[rgba(233,238,245,0.98)]">
             Join the waitlist
           </DialogTitle>
