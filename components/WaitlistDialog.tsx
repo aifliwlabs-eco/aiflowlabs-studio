@@ -15,26 +15,11 @@ import { GradientButton } from "@/components/GradientButton";
 
 type MsgState = { type: "ok" | "err" | "neutral"; text: string };
 
-// Сообщение из Apps Script
-type AppScriptMessage = {
-  ok: boolean;
-  duplicate?: boolean;
-  reason?: string;
-};
-
-const isAppScriptMessage = (v: unknown): v is AppScriptMessage => {
-  if (typeof v !== "object" || v === null) return false;
-  const r = v as Record<string, unknown>;
-  const okValid = typeof r.ok === "boolean";
-  const dupValid =
-    r.duplicate === undefined || typeof r.duplicate === "boolean";
-  const reasonValid =
-    r.reason === undefined || typeof r.reason === "string";
-  return okValid && dupValid && reasonValid;
-};
-
 export function WaitlistDialog() {
   const formRef = React.useRef<HTMLFormElement | null>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+  const submittingRef = React.useRef(false);
+
   const [msg, setMsg] = React.useState<MsgState>({
     type: "neutral",
     text: "",
@@ -60,59 +45,32 @@ export function WaitlistDialog() {
     return () => btn?.removeEventListener("click", onClick);
   }, []);
 
-  // приём ответа от Apps Script через postMessage
+  // слушаем загрузку скрытого iframe: это сигнал, что POST в скрипт завершён
   React.useEffect(() => {
-    function onMessage(ev: MessageEvent) {
-      // Для отладки: обязательно посмотри это в консоли после отправки формы
-      console.log("[waitlist] message event:", ev.origin, ev.data);
+    const iframe = iframeRef.current;
+    if (!iframe) return;
 
-      let payload: unknown = ev.data;
+    const handleLoad = () => {
+      // срабатывает при любой загрузке iframe
+      if (!submittingRef.current) return; // игнорируем первые/случайные загрузки
 
-      if (typeof payload === "string") {
-        try {
-          payload = JSON.parse(payload);
-        } catch {
-          // не JSON — игнорируем
-        }
-      }
-
-      if (!isAppScriptMessage(payload)) return;
-
+      submittingRef.current = false;
       setBusy(false);
 
-      if (payload.ok === false) {
-        setMsg({
-          type: "err",
-          text: "Something went wrong. Please try again.",
-        });
-        return;
-      }
-
-      if (payload.ok === true && payload.reason === "quota_exhausted") {
-        setMsg({
-          type: "ok",
-          text: "Request accepted. We will email you later (quota temporarily exhausted).",
-        });
-        formRef.current?.reset();
-        return;
-      }
-
+      // оптимистично считаем, что всё прошло хорошо
       setMsg({
         type: "ok",
-        text: payload.duplicate
-          ? "You’re already on the list."
-          : "Thanks! You’re on the list.",
+        text: "Thanks! Check your inbox, we’ve just sent you a message.",
       });
       formRef.current?.reset();
       setTimeout(() => setOpen(false), 900);
-    }
+    };
 
-    // В этом месте Sonar ругается на origin — осознанно глушим:
-    window.addEventListener("message", onMessage); // NOSONAR
-    return () => window.removeEventListener("message", onMessage);
+    iframe.addEventListener("load", handleLoad);
+    return () => iframe.removeEventListener("load", handleLoad);
   }, []);
 
-  // класс статуса
+  // класс статуса без вложенных тернарников
   let msgClass = "";
   if (msg.type === "ok") msgClass = "tw-text-[#7cff96]";
   else if (msg.type === "err") msgClass = "tw-text-[#ff7a7a]";
@@ -130,7 +88,7 @@ export function WaitlistDialog() {
           tw-text-[rgba(233,238,245,0.98)]
         "
       >
-        {/* ✕ — как .close-x на проде (без рамки и бордера) */}
+        {/* ✕ — как .close-x (без рамки и бордера) */}
         <button
           type="button"
           aria-label="Close"
@@ -163,7 +121,7 @@ export function WaitlistDialog() {
         <form
           ref={formRef}
           id="waitlistForm"
-          action="https://script.google.com/macros/s/AKfycbywRirG_FrV1QxS0sHYYazlcFi3TEeDIvYx-3LQp_RCEHth_S4MEPq71wY_D5wdiuo9/exec?pm=1"
+          action="https://script.google.com/macros/s/AKfycbwU7mucM9BCJqf76CIEDQH8UQZUBPIoXBYyntlbwrIAH2ie4eEci67iZvo31c_j9Irk/exec"
           method="POST"
           target={iframeName}
           onSubmit={(e) => {
@@ -187,6 +145,9 @@ export function WaitlistDialog() {
               setMsg({ type: "err", text: "Please enter a valid email." });
               return;
             }
+
+            // даём форме реально уйти в iframe
+            submittingRef.current = true;
             setBusy(true);
           }}
         >
@@ -199,7 +160,6 @@ export function WaitlistDialog() {
             style={{ position: "absolute", left: -9999, opacity: 0 }}
             aria-hidden="true"
           />
-          <input type="hidden" name="pm" value="1" />
 
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-[10px] tw-mt-[14px]">
             <div className="tw-flex-1 min-[380px]:tw-flex-initial min-[380px]:tw-basis-[45%]">
@@ -255,8 +215,9 @@ export function WaitlistDialog() {
             {msg.text}
           </output>
 
-          {/* скрытый iframe — приём ответа */}
+          {/* скрытый iframe — приём ответа, только по onload */}
           <iframe
+            ref={iframeRef}
             name={iframeName}
             style={{ display: "none" }}
             title="Hidden waitlist form target"
