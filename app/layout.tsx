@@ -77,7 +77,7 @@ export default function RootLayout({
 
         {/* Твой site.js с YouTube-тостом и звуком */}
         <Script
-          src="/assets/site.js?v=13"
+          src="/assets/site.js?v=14"
           strategy="afterInteractive"
           crossOrigin="anonymous"
         />
