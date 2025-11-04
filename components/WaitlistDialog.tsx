@@ -35,6 +35,8 @@ const isAppScriptMessage = (v: unknown): v is AppScriptMessage => {
 
 export function WaitlistDialog() {
   const formRef = React.useRef<HTMLFormElement | null>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+
   const [msg, setMsg] = React.useState<MsgState>({
     type: "neutral",
     text: "",
@@ -63,10 +65,15 @@ export function WaitlistDialog() {
   // приём ответа от Apps Script через postMessage
   React.useEffect(() => {
     function onMessage(ev: MessageEvent) {
-      // origin от Apps Script может меняться (script.google.com, *.googleusercontent.com и т.п.),
-      // поэтому не режем по origin, а защищаемся формой payload.
-      // Sonar S2819 просит проверять origin, но в этом конкретном случае
-      // безопаснее полагаться на строгую проверку структуры объекта.
+      const iframeWin = iframeRef.current?.contentWindow;
+      if (!iframeWin) return;
+
+      // Берём сообщения только от нашего hidden_iframe
+      if (ev.source !== iframeWin) {
+        return;
+      }
+
+      console.log("[waitlist] postMessage received:", ev.origin, ev.data);
 
       let payload: unknown = ev.data;
 
@@ -109,8 +116,7 @@ export function WaitlistDialog() {
       setTimeout(() => setOpen(false), 900);
     }
 
-    // игнорируем S2819 здесь осознанно: см. комментарий в onMessage
-    window.addEventListener("message", onMessage); // NOSONAR
+    window.addEventListener("message", onMessage); // NOSONAR (origin is validated via ev.source === iframeWindow)
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
@@ -259,6 +265,7 @@ export function WaitlistDialog() {
 
           {/* скрытый iframe — приём ответа */}
           <iframe
+            ref={iframeRef}
             name={iframeName}
             style={{ display: "none" }}
             title="Hidden waitlist form target"
