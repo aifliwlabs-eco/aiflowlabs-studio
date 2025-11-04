@@ -71,7 +71,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </Script>
 
         {/* legacy site script, load after parse */}
-        <script src="/assets/site.js?v=5" defer />
+        <Script
+          src="/assets/site.js?v=7"
+          type="module"
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
+
 
 
         <noscript>

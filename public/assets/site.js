@@ -1,8 +1,8 @@
 /* eslint-env browser */
-// public/assets/site.js — v6
+// public/assets/site.js — v7
 (function () {
   // Маркер, что файл реально загрузился
-  console.log("[site.js] loaded v6");
+  console.log("[site.js] loaded v7");
 
   function showYouTubeNotice() {
     // Remove any existing toasts
@@ -62,12 +62,15 @@
     showYouTubeNotice();
   }
 
+  // Используем globalThis, как просит Sonar
   globalThis.addEventListener("DOMContentLoaded", () => {
     const a = document.getElementById("ytLink");
     if (a && !a.dataset.bound) {
-      a.addEventListener("click", onYouTubeClick, { passive: true });
+      // без { passive: true }
+      a.addEventListener("click", onYouTubeClick);
       a.dataset.bound = "1";
     }
-    document.addEventListener("click", onYouTubeClick, { passive: true });
+    // Делегирование тоже без passive
+    document.addEventListener("click", onYouTubeClick);
   });
 })();
