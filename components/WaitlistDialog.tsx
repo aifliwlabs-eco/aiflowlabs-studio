@@ -61,7 +61,7 @@ export function WaitlistDialog() {
     });
 
     formRef.current?.reset();
-    setTimeout(() => setOpen(false), 900);
+    setTimeout(() => setOpen(false), 3000);
   }, []);
 
   // класс статуса без вложенных тернарников
