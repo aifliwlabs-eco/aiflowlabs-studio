@@ -29,28 +29,8 @@ export default function Card() {
           Notify me
         </GradientButton>
 
-        {/* YouTube link styled as a gradient button (no nested interactive elements) */}
-        <a
-          id="ytLink"
-          href="https://www.youtube.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="AIFlow Labs Studio YouTube"
-          // same look as GradientButton (gradient + elevation + motion)
-          className="
-            tw-inline-flex tw-items-center tw-justify-center
-            tw-rounded-[12px] tw-pl-[18px] tw-pr-[16px] tw-py-[12px]
-            tw-font-semibold tw-leading-[1.1] tw-no-underline
-            tw-transform tw-transition-[transform,filter,box-shadow] tw-duration-150 tw-ease-out
-            hover:tw--translate-y-[1px] hover:tw-brightness-[1.05]
-          "
-          style={{
-            color: "rgb(11, 15, 20)",
-            backgroundImage: "linear-gradient(90deg,var(--grad-a),var(--grad-b))",
-            boxShadow: "0 6px 18px rgba(0,212,255,0.25)",
-            cursor: "pointer",
-          }}
-        >
+        {/* YouTube button — больше НЕ <a>, чтобы не было перехода */}
+        <GradientButton id="ytLink" type="button">
           {/* Play icon via SVG (replaces legacy ::before triangle) */}
           <svg
             aria-hidden="true"
@@ -64,7 +44,7 @@ export default function Card() {
             <path d="M0 0 L10 6 L0 12 Z" />
           </svg>
           YouTube
-        </a>
+        </GradientButton>
       </div>
 
       {/* Page-level feedback (used by site.js; harmless if unused) */}

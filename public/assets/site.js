@@ -2,7 +2,7 @@
 // public/assets/site.js — v7
 (function () {
   // Маркер, что файл реально загрузился
-  console.log("[site.js] loaded v7");
+  console.log("[site.js] loaded v8");
 
   function showYouTubeNotice() {
     // Remove any existing toasts
